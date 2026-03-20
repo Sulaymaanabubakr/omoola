@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidString(field, maxLength) {
+      return field is string
+        && field.size() > 0
+        && field.size() <= maxLength;
+    }
+
+    function isOptionalString(field, maxLength) {
+      return !(field is string)
+        || field.size() <= maxLength;
+    }
+
+    function isValidOrderStatus(status) {
+      return status in ['pending', 'processing', 'completed', 'cancelled'];
+    }
+
+    function isValidOrderCreate() {
+      return request.resource.data.keys().hasOnly([
+          'customerName',
+          'phone',
+          'address',
+          'notes',
+          'status',
+          'total',
+          'createdAt'
+        ])
+        && isValidString(request.resource.data.customerName, 120)
+        && isValidString(request.resource.data.phone, 30)
+        && isOptionalString(request.resource.data.address, 500)
+        && isOptionalString(request.resource.data.notes, 1000)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.total is number
+        && request.resource.data.total >= 0
+        && request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidOrderUpdate() {
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly(['status'])
+        && isValidOrderStatus(request.resource.data.status);
+    }
+
+    function isValidOrderItemCreate() {
+      return request.resource.data.keys().hasOnly([
+          'orderId',
+          'productId',
+          'productName',
+          'productImage',
+          'quantity',
+          'price'
+        ])
+        && isValidString(request.resource.data.orderId, 128)
+        && isValidString(request.resource.data.productId, 128)
+        && isValidString(request.resource.data.productName, 200)
+        && isValidString(request.resource.data.productImage, 2000)
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity > 0
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0;
+    }
+
+    function isValidMessageCreate() {
+      return request.resource.data.keys().hasOnly([
+          'name',
+          'contact',
+          'message',
+          'isRead',
+          'createdAt'
+        ])
+        && isValidString(request.resource.data.name, 120)
+        && isValidString(request.resource.data.contact, 160)
+        && isValidString(request.resource.data.message, 2000)
+        && request.resource.data.isRead == false
+        && request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidMessageUpdate() {
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly(['isRead'])
+        && request.resource.data.isRead is bool;
+    }
+
+    match /admins/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // Products - public read, admin write
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Categories - public read, admin write
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders - public create (checkout), admin read/update
+    match /orders/{orderId} {
+      allow create: if isValidOrderCreate();
+      allow read: if isAdmin();
+      allow update: if isAdmin() && isValidOrderUpdate();
+      allow delete: if false;
+    }
+
+    // Order items - public create, admin read
+    match /orderItems/{itemId} {
+      allow create: if isValidOrderItemCreate();
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Messages - public create, admin read/update
+    match /messages/{messageId} {
+      allow create: if isValidMessageCreate();
+      allow read: if isAdmin();
+      allow update: if isAdmin() && isValidMessageUpdate();
+      allow delete: if false;
+    }
+  }
+}
