@@ -5,6 +5,7 @@ dist/
 .env
 .env.local
 .env.*.local
+omoola-supermarket-firebase-adminsdk-fbsvc-04effc069f.json
 *-firebase-adminsdk-*.json
 
 npm-debug.log*
