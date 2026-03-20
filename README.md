@@ -1,30 +1,6 @@
 # Omoola Supermarket Stores
 
-A full-stack supermarket e-commerce web application for **Omoola Supermarket Stores** in Owode Yewa, Ogun State, Nigeria.
-
-Built with **React + TypeScript + Vite**, styled with **TailwindCSS**, powered by **Firebase** (Auth, Firestore, Storage), with WhatsApp order integration.
-
----
-
-## Features
-
-### Public Storefront
-- 🏠 Home page with hero, category grid, and featured products
-- 🛍️ Products listing with real-time search, category filter, and sort
-- 📦 Product detail page with quantity selector and related products
-- 🛒 Shopping cart with persistent local storage
-- 💳 Checkout flow with order creation and form validation
-- 📲 WhatsApp order integration — auto-generates order message
-- ✅ Order success page with reference number
-- 📬 Contact form — stores messages in Firestore
-
-### Admin Dashboard (`/admin`)
-- 🔐 Secure Firebase Authentication login
-- 📊 Dashboard overview: total products, categories, orders, messages, revenue
-- 📦 **Products** — full CRUD: add, edit, delete with image upload to Firebase Storage
-- 🏷️ **Categories** — inline create, edit, delete
-- 🛒 **Orders** — expandable order rows, item details, status management (Pending → Processing → Completed → Cancelled), WhatsApp customer link
-- 💬 **Messages** — read/unread state, full message view, reply via WhatsApp or email
+A full-stack e-commerce storefront for Omoola Supermarket Stores, built with **React + Vite** (frontend) and **Express** (backend API), deployed on **Vercel** as a serverless function, with **Firebase** for auth/database and **Paystack** for payments.
 
 ---
 
@@ -32,196 +8,176 @@ Built with **React + TypeScript + Vite**, styled with **TailwindCSS**, powered b
 
 | Layer | Technology |
 |---|---|
-| Framework | React 18 + Vite |
-| Language | TypeScript |
-| Styling | TailwindCSS |
-| Routing | React Router v6 |
-| State | Zustand (cart + auth) |
-| Backend | Firebase (Auth, Firestore, Storage) |
-| Notifications | react-hot-toast |
-| Icons | Lucide React |
+| Frontend | React 18, Vite, React Router v7, TailwindCSS, shadcn/ui |
+| Backend | Express 5 (Vercel Serverless Function) |
+| Auth | Firebase Auth (email + Google) |
+| Database | Firestore (Firebase Admin SDK) |
+| Payments | Paystack |
+| Email | Brevo |
+| Images | Cloudinary |
 
 ---
 
-## Setup Instructions
+## Local Development
 
-### 1. Clone the repository
-
-```bash
-git clone <your-repo-url>
-cd omoola-supermarket
-```
-
-### 2. Install dependencies
-
+### 1. Install dependencies
 ```bash
 npm install
 ```
 
-### 3. Create a Firebase project
-
-1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Create a new project (e.g. `omoola-supermarket`)
-3. Enable **Authentication** → Email/Password sign-in method
-4. Create a **Firestore Database** in production mode
-5. Enable **Firebase Storage**
-6. Register a **Web App** and copy the config
-
-### 4. Set environment variables
-
-Copy `.env.example` to `.env`:
-
+### 2. Set up environment variables
+Copy `.env.example` to `.env` and fill in all values:
 ```bash
 cp .env.example .env
 ```
 
-Fill in your Firebase config:
+Local development uses one shared root `.env` file for both the Vite frontend and the backend API. The backend server explicitly loads the root `.env`, including when it is started from the `functions/` directory.
 
-```env
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-VITE_WHATSAPP_NUMBER=2348000000000
-```
+See the [Environment Variables](#environment-variables) section below for details on each variable.
 
-> **VITE_WHATSAPP_NUMBER** must be in international format without `+` (e.g. `2348012345678`)
-
-### 5. Apply Firestore security rules
-
-In Firebase Console → Firestore → Rules, paste the contents of `firestore.rules`.
-
-Or using Firebase CLI:
-```bash
-npm install -g firebase-tools
-firebase login
-firebase init
-firebase deploy --only firestore:rules,storage
-```
-
-### 6. Create the admin user
-
-In Firebase Console:
-1. Go to **Authentication** → **Users** → **Add user**
-2. Enter admin email and password
-3. Save — this account will be used to log in at `/admin/login`
-
-### 7. Run locally
-
+### 3. Run the app
+This starts both the Firebase Functions API server and the Vite dev server concurrently:
 ```bash
 npm run dev
 ```
 
-App runs at `http://localhost:5173`
+- Frontend: http://localhost:3000
+- API: proxied through the Vite dev server at `http://localhost:3000/api/*`
+
+> The Vite dev server proxies all `/api/*` requests to `:3001` automatically.
+
+### Other Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start both frontend and backend in watch mode |
+| `npm run dev:web` | Start only the Vite frontend |
+| `npm run dev:api` | Start only the Express API server |
+| `npm run build` | Build the frontend for production |
+| `npm run lint` | TypeScript type check |
+| `npm run seed` | Seed sample products into Firestore |
+| `npm run make-admin` | Promote a Firebase user to admin role |
+| `npm run doctor` | Check environment variable configuration |
 
 ---
 
-## How the Admin Dashboard Works
+## Environment Variables
 
-### Login
-Navigate to `/admin/login` and sign in with the Firebase admin email/password you created.
+All variables must be added to your local root `.env` file for development. For production, add the same values to the platform that runs that part of the app:
 
-### Products
-- Click **Add Product** to open the product form
-- Fill in name, description, price, category — upload an image or paste an image URL
-- Toggle **Featured** to highlight on the homepage
-- Toggle **In Stock** to control availability
-- Hover any row to reveal **Edit** and **Delete** actions
-- All changes reflect **instantly** via Firestore real-time subscriptions
+- Frontend values: Vercel project environment variables
+- Backend/API secrets: Firebase Functions secrets and any deployment-specific environment configuration
 
-### Categories
-- Type a category name and click **Add**
-- Hover any row to **edit inline** or **delete**
-- Categories are used to filter products on the storefront
+### Firebase (Frontend)
+These are embedded into the client bundle by Vite and are safe to expose.
 
-### Orders
-- Orders are created automatically when customers checkout
-- Click any order row to **expand** and see order items and details
-- Use the status buttons to update: **Pending → Processing → Completed → Cancelled**
-- Click **WhatsApp Customer** to open a pre-filled WhatsApp chat
+| Variable | Description |
+|---|---|
+| `VITE_FIREBASE_API_KEY` | Firebase project API key |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID |
+| `VITE_FIREBASE_APP_ID` | Firebase app ID |
 
-### Messages
-- Messages sent from the Contact page appear here in real-time
-- Click a message to expand and mark it as **read**
-- Reply via **WhatsApp** or **email** links
+### Firebase Admin SDK (Backend — Keep Secret)
+| Variable | Description |
+|---|---|
+| `FIREBASE_PROJECT_ID` | Same as project ID above |
+| `FIREBASE_CLIENT_EMAIL` | Service account client email |
+| `FIREBASE_PRIVATE_KEY` | Service account private key. In Vercel, paste the raw key with **real newlines** (not `\n`). |
+
+### App Configuration
+| Variable | Description |
+|---|---|
+| `CORS_ORIGINS` | Comma-separated list of allowed origins, e.g. `https://yourapp.vercel.app` |
+| `APP_URL` | Canonical public URL of the app, e.g. `https://yourapp.vercel.app` |
+
+### Paystack
+| Variable | Description |
+|---|---|
+| `PAYSTACK_PUBLIC_KEY` | Paystack public key (used on frontend if needed) |
+| `PAYSTACK_SECRET_KEY` | Paystack secret key (**backend only — never expose to frontend**) |
+| `PAYSTACK_WEBHOOK_SECRET` | Optional explicit webhook secret. If omitted, the backend falls back to `PAYSTACK_SECRET_KEY`. |
+
+### Email
+| Variable | Description |
+|---|---|
+| `BREVO_API_KEY` | Brevo API key for transactional emails |
+| `EMAIL_FROM` | Sender address e.g. `Store Name <orders@yourdomain.com>` |
+| `EMAIL_FROM_NAME` | Optional fallback display name for transactional emails |
+
+### Cloudinary
+| Variable | Description |
+|---|---|
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 
 ---
 
-## Deployment
+## Deployment (Vercel)
 
-### Deploy to Vercel (Recommended)
+This project is configured as a **Vite SPA frontend** with a **Firebase Functions backend API**.
 
-```bash
-npm run build
-# Then deploy dist/ to Vercel, or connect your GitHub repo
-```
+### How it works
+- `vercel.json` rewrites `/api/*` requests to the deployed Firebase Function
+- All other routes serve `index.html` (SPA client-side routing)
 
-Set all `VITE_*` environment variables in Vercel project settings.
+### Steps
+1. Push to GitHub
+2. Import the repo in Vercel
+3. Add frontend `VITE_*` variables to Vercel
+4. Add backend secrets to Firebase Functions
+5. Deploy
 
-### Deploy to Firebase Hosting
-
-```bash
-npm run build
-firebase init hosting  # choose dist/ as public directory, SPA: yes
-firebase deploy
-```
+> **Important:** `FIREBASE_PRIVATE_KEY` must be pasted with **real newlines** in the Vercel dashboard, not the `\n` escape sequence. Copy the raw key text from your service account JSON file.
 
 ---
 
 ## Project Structure
 
 ```
-src/
-├── components/
-│   ├── admin/       # ProtectedRoute, AdminSidebar, AdminHeader, ProductForm, ConfirmDialog
-│   └── shop/        # Navbar, Footer, ProductCard, ProductGrid
-├── hooks/           # useProducts, useCategories, useOrders, useMessages
-├── layouts/         # PublicLayout, AdminLayout
-├── lib/             # Firebase initialization
-├── pages/
-│   ├── admin/       # AdminLoginPage, AdminDashboardPage, AdminProductsPage,
-│   │                # AdminCategoriesPage, AdminOrdersPage, AdminMessagesPage
-│   └── shop/        # HomePage, ProductsPage, ProductDetailPage, CartPage,
-│                    # CheckoutPage, OrderSuccessPage, ContactPage
-├── services/        # auth.ts, products.ts, categories.ts, orders.ts, messages.ts
-├── store/           # cartStore.ts (Zustand), authStore.ts (Zustand)
-├── types/           # index.ts — all TypeScript interfaces
-└── utils/           # formatPrice, formatDate, generateWhatsAppMessage, cn, etc.
+/
+├── src/
+│   ├── components/
+│   │   ├── admin/        # Admin dashboard components
+│   │   ├── layout/       # Header, footer
+│   │   ├── providers/    # React context providers (auth, cart)
+│   │   ├── store/        # Product card, cart drawer, page clients
+│   │   └── ui/           # shadcn/ui base components
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/
+│   │   ├── firebase/     # Admin SDK + client SDK setup
+│   │   ├── constants.ts  # Business constants (name, phone, etc.)
+│   │   ├── email.ts      # Brevo email sender
+│   │   ├── schemas/      # Zod validation schemas
+│   │   └── utils.ts      # Utility helpers
+│   ├── spa/
+│   │   ├── App.tsx       # Root router
+│   │   └── pages/        # Page-level components
+│   └── types/            # TypeScript type definitions
+├── functions/
+│   └── src/api/          # Express API served via Firebase Functions
+├── firebase/
+│   └── firestore.rules   # Firestore security rules
+├── scripts/              # CLI scripts (seed, make-admin, doctor)
+├── .env.example          # Environment variable template
+└── vercel.json           # Vercel routing configuration
 ```
 
 ---
 
-## Firestore Data Model
+## Making a User Admin
 
+```bash
+npm run make-admin -- user@example.com
 ```
-products/
-  {id}: { name, description, price, imageUrl, categoryId, isFeatured, inStock, createdAt }
 
-categories/
-  {id}: { name, slug, createdAt }
-
-orders/
-  {id}: { customerName, phone, address, notes, status, total, createdAt }
-
-orderItems/
-  {id}: { orderId, productId, productName, productImage, quantity, price }
-
-messages/
-  {id}: { name, contact, message, isRead, createdAt }
-```
+This sets the `role: "admin"` field on the user's Firestore document, giving them access to `/admin/*` routes.
 
 ---
 
-## Notes
+## License
 
-- Cart data persists in **localStorage** via Zustand persist middleware
-- Admin routes are protected — unauthenticated users are redirected to `/admin/login`
-- All admin data (products, categories, orders, messages) uses **Firestore real-time listeners** for instant updates
-- WhatsApp integration generates a pre-filled `wa.me` link with full order details
-- Images are uploaded to **Firebase Storage** under `products/` path
-
----
-
-*Built for Omoola Supermarket Stores — Owode Yewa, Ogun State, Nigeria 🇳🇬*
+Private. All rights reserved — Omoola Supermarket Stores.

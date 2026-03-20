@@ -1,0 +1,59 @@
+[debug] [2026-03-20T18:30:49.072Z] ----------------------------------------------------------------------
+[debug] [2026-03-20T18:30:49.077Z] Command:       /usr/local/bin/node /Users/sulaymaanabubakr/.npm-global/bin/firebase projects:list --json
+[debug] [2026-03-20T18:30:49.078Z] CLI Version:   15.9.0
+[debug] [2026-03-20T18:30:49.078Z] Platform:      darwin
+[debug] [2026-03-20T18:30:49.078Z] Node Version:  v24.12.0
+[debug] [2026-03-20T18:30:49.078Z] Time:          Fri Mar 20 2026 19:30:49 GMT+0100 (West Africa Standard Time)
+[debug] [2026-03-20T18:30:49.079Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-20T18:30:49.490Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-20T18:30:49.491Z] > authorizing via signed-in user (abubakrysulaimaan24434@gmail.com)
+[debug] [2026-03-20T18:30:49.496Z] Checked if tokens are valid: false, expires at: 1773829140647
+[debug] [2026-03-20T18:30:49.496Z] Checked if tokens are valid: false, expires at: 1773829140647
+[debug] [2026-03-20T18:30:49.497Z] > refreshing access token with scopes: []
+[debug] [2026-03-20T18:30:49.500Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-03-20T18:30:49.500Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-03-20T18:30:53.188Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-03-20T18:30:53.188Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-03-20T18:30:53.240Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-03-20T18:30:54.517Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-03-20T18:30:54.517Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] ┌────────────────────────┬────────────────────────────┬────────────────┬──────────────────────┐
+│ Project Display Name   │ Project ID                 │ Project Number │ Resource Location ID │
+├────────────────────────┼────────────────────────────┼────────────────┼──────────────────────┤
+│ Afinju Luxury          │ afinju-luxury              │ 494280387819   │ [Not specified]      │
+├────────────────────────┼────────────────────────────┼────────────────┼──────────────────────┤
+│ Al-Ihsan Relief        │ al-ihsan-relief            │ 133508129635   │ [Not specified]      │
+├────────────────────────┼────────────────────────────┼────────────────┼──────────────────────┤
+│ Circles App By Empylo  │ circles-app-by-empylo      │ 433309283212   │ [Not specified]      │
+├────────────────────────┼────────────────────────────┼────────────────┼──────────────────────┤
+│ Yustam Marketplace     │ gen-lang-client-0147282450 │ 242834809768   │ [Not specified]      │
+├────────────────────────┼────────────────────────────┼────────────────┼──────────────────────┤
+│ Madonna Shopping Arena │ madonna-shopping-arena     │ 257467572198   │ [Not specified]      │
+├────────────────────────┼────────────────────────────┼────────────────┼──────────────────────┤
+│ Omoola Supermarket     │ omoola-supermarket         │ 82590918493    │ [Not specified]      │
+└────────────────────────┴────────────────────────────┴────────────────┴──────────────────────┘
+[info] 
+[info] 6 project(s) total.
+[debug] [2026-03-20T18:31:48.031Z] ----------------------------------------------------------------------
+[debug] [2026-03-20T18:31:48.037Z] Command:       /usr/local/bin/node /Users/sulaymaanabubakr/.npm-global/bin/firebase deploy --project omoola-supermarket --only firestore:rules,firestore:indexes,functions
+[debug] [2026-03-20T18:31:48.038Z] CLI Version:   15.9.0
+[debug] [2026-03-20T18:31:48.038Z] Platform:      darwin
+[debug] [2026-03-20T18:31:48.038Z] Node Version:  v24.12.0
+[debug] [2026-03-20T18:31:48.038Z] Time:          Fri Mar 20 2026 19:31:48 GMT+0100 (West Africa Standard Time)
+[debug] [2026-03-20T18:31:48.038Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-20T18:31:57.456Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-20T18:31:57.459Z] > authorizing via signed-in user (abubakrysulaimaan24434@gmail.com)
+[debug] [2026-03-20T18:31:57.461Z] [iam] checking project omoola-supermarket for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2026-03-20T18:31:57.463Z] Checked if tokens are valid: true, expires at: 1774035052188
+[debug] [2026-03-20T18:31:57.464Z] Checked if tokens are valid: true, expires at: 1774035052188
+[debug] [2026-03-20T18:31:57.466Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/omoola-supermarket:testIamPermissions [none]
+[debug] [2026-03-20T18:31:57.467Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/omoola-supermarket:testIamPermissions  x-goog-user-project=omoola-supermarket
+[debug] [2026-03-20T18:31:57.467Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/omoola-supermarket:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-03-20T18:32:03.592Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/omoola-supermarket:testIamPermissions 200
+[debug] [2026-03-20T18:32:03.593Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/omoola-supermarket:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-03-20T18:32:03.594Z] Checked if tokens are valid: true, expires at: 1774035052188
+[debug] [2026-03-20T18:32:03.594Z] Checked if tokens are valid: true, expires at: 1774035052188
+[debug] [2026-03-20T18:32:03.594Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/omoola-supermarket/serviceAccounts/omoola-supermarket@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-03-20T18:32:03.594Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/omoola-supermarket/serviceAccounts/omoola-supermarket@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}

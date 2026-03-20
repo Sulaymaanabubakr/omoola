@@ -1,65 +1,117 @@
-import { Timestamp } from 'firebase/firestore';
+export type UserRole = "admin" | "customer";
 
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  categoryId: string;
-  categoryName?: string;
-  isFeatured: boolean;
-  inStock: boolean;
-  createdAt: Timestamp | Date;
-}
-
-export interface Category {
+export type Category = {
   id: string;
   name: string;
   slug: string;
-  createdAt: Timestamp | Date;
-}
+  description?: string;
+  imageUrl?: string;
+  createdAt: string;
+};
 
-export interface Order {
-  id: string;
-  customerName: string;
-  phone: string;
-  address?: string;
-  notes?: string;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
-  total: number;
-  createdAt: Timestamp | Date;
-}
+export type ProductImage = {
+  publicId: string;
+  url: string;
+  alt: string;
+};
 
-export interface OrderItem {
-  id: string;
-  orderId: string;
-  productId: string;
-  productName: string;
-  productImage: string;
-  quantity: number;
-  price: number;
-}
-
-export interface Message {
+export type Product = {
   id: string;
   name: string;
-  contact: string;
-  message: string;
-  isRead: boolean;
-  createdAt: Timestamp | Date;
-}
-
-export interface CartItem {
-  productId: string;
-  name: string;
+  slug: string;
+  description: string;
   price: number;
-  imageUrl: string;
-  quantity: number;
-}
+  compareAtPrice?: number;
+  categoryId: string;
+  categoryName: string;
+  tags: string[];
+  featured: boolean;
+  bestSeller: boolean;
+  newArrival: boolean;
+  images: ProductImage[];
+  stockQty: number;
+  sku: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 
-export interface User {
+export type UserProfile = {
   uid: string;
-  email: string | null;
-  displayName: string | null;
-}
+  name: string;
+  email: string;
+  phone?: string;
+  role: UserRole;
+  createdAt: string;
+};
+
+export type CartItem = {
+  productId: string;
+  productSlug?: string;
+  name: string;
+  price: number;
+  qty: number;
+  imageUrl: string;
+  stockQty: number;
+};
+
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "packed"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "refunded";
+
+export type Order = {
+  id: string;
+  orderNumber: string;
+  userId?: string;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  items: CartItem[];
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    addressLine1: string;
+    city: string;
+    state: string;
+    notes?: string;
+  };
+  payment: {
+    provider: "paystack";
+    reference: string;
+    status: "paid" | "unpaid";
+    paidAt?: string;
+  };
+  status: OrderStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type StatusEvent = {
+  status: OrderStatus;
+  note?: string;
+  createdAt: string;
+};
+
+export type StoreSettings = {
+  storeName: string;
+  storeAddress: string;
+  phone: string;
+  email: string;
+  whatsapp: string;
+  heroImages: string[];
+  deliveryFee: number;
+  announcementEnabled: boolean;
+  announcementText: string;
+  announcementSpeed: number;
+  updatedAt: string;
+};
