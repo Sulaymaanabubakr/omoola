@@ -41,6 +41,7 @@ export const defaultHeroImages = [
 
 export const defaultStoreSettings: StoreSettings = {
   storeName: BUSINESS.name,
+  logoUrl: "/logo.png",
   storeAddress: BUSINESS.address,
   phone: BUSINESS.phone,
   email: BUSINESS.email,
@@ -57,6 +58,7 @@ export function serializeStoreSettings(raw?: Record<string, unknown>): StoreSett
   const source = raw ?? {};
   return {
     storeName: toStringValue(source.storeName, defaultStoreSettings.storeName),
+    logoUrl: toStringValue(source.logoUrl, defaultStoreSettings.logoUrl),
     storeAddress: toStringValue(source.storeAddress, defaultStoreSettings.storeAddress),
     phone: toStringValue(source.phone, defaultStoreSettings.phone),
     email: toStringValue(source.email, defaultStoreSettings.email),

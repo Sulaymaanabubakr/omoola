@@ -12,6 +12,18 @@ import { doc, getDoc, setDoc, updateDoc, collection } from "firebase/firestore";
 import { useAuth } from "@/components/providers/auth-provider";
 import type { Product, ProductImage } from "@/types";
 
+type ProductFormState = Omit<Partial<Product>, "price" | "compareAtPrice" | "stockQty"> & {
+    price: number | "";
+    compareAtPrice: number | "";
+    stockQty: number | "";
+};
+
+function parseNumberInput(value: string): number | "" {
+    if (value === "") return "";
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : "";
+}
+
 export function AdminProductEditPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -21,7 +33,7 @@ export function AdminProductEditPage() {
     const [loading, setLoading] = useState(!isNew);
     const [saving, setSaving] = useState(false);
 
-    const [formData, setFormData] = useState<Partial<Product>>({
+    const [formData, setFormData] = useState<ProductFormState>({
         name: "",
         slug: "",
         description: "",
@@ -47,7 +59,13 @@ export function AdminProductEditPage() {
                     if (!db) return;
                     const docSnap = await getDoc(doc(db, "products", id));
                     if (docSnap.exists()) {
-                        setFormData(docSnap.data() as Product);
+                        const product = docSnap.data() as Product;
+                        setFormData({
+                            ...product,
+                            price: product.price ?? "",
+                            compareAtPrice: product.compareAtPrice ?? "",
+                            stockQty: product.stockQty ?? "",
+                        });
                     } else {
                         toast.error("Product not found");
                         navigate("/admin/products");
@@ -122,8 +140,15 @@ export function AdminProductEditPage() {
             const db = await getDbClient();
             if (!db) throw new Error("Firebase not initialized");
 
+            if (formData.price === "" || formData.stockQty === "") {
+                throw new Error("Price and stock quantity are required");
+            }
+
             const productData = {
                 ...formData,
+                price: formData.price,
+                stockQty: formData.stockQty,
+                compareAtPrice: formData.compareAtPrice === "" ? undefined : formData.compareAtPrice,
                 updatedAt: new Date().toISOString()
             };
 
@@ -196,11 +221,11 @@ export function AdminProductEditPage() {
                         <CardContent className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Price (₦) *</label>
-                                <Input type="number" required min="0" value={formData.price} onChange={e => setFormData({ ...formData, price: Number(e.target.value) })} />
+                                <Input type="number" required min="0" value={formData.price} onChange={e => setFormData({ ...formData, price: parseNumberInput(e.target.value) })} />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Compare at Price (₦)</label>
-                                <Input type="number" min="0" value={formData.compareAtPrice} onChange={e => setFormData({ ...formData, compareAtPrice: Number(e.target.value) })} />
+                                <Input type="number" min="0" value={formData.compareAtPrice} onChange={e => setFormData({ ...formData, compareAtPrice: parseNumberInput(e.target.value) })} />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">SKU</label>
@@ -208,7 +233,7 @@ export function AdminProductEditPage() {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Stock Quantity *</label>
-                                <Input type="number" required min="0" value={formData.stockQty} onChange={e => setFormData({ ...formData, stockQty: Number(e.target.value) })} />
+                                <Input type="number" required min="0" value={formData.stockQty} onChange={e => setFormData({ ...formData, stockQty: parseNumberInput(e.target.value) })} />
                             </div>
                         </CardContent>
                     </Card>

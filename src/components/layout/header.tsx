@@ -6,7 +6,6 @@ import { Menu, Search, ShoppingBag, User2, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { BUSINESS } from "@/lib/constants";
 import { fetchPublicSettings } from "@/lib/firestore";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -24,6 +23,7 @@ const navItems = [
 
 type PublicHeaderSettings = {
     storeName: string;
+    logoUrl: string;
     phone: string;
     announcementEnabled: boolean;
     announcementText: string;
@@ -38,6 +38,7 @@ export function Header() {
     const [searchOpen, setSearchOpen] = useState(false);
     const [publicSettings, setPublicSettings] = useState<PublicHeaderSettings>({
         storeName: BUSINESS.name,
+        logoUrl: "/logo.png",
         phone: BUSINESS.phone,
         announcementEnabled: false,
         announcementText: "",
@@ -45,6 +46,7 @@ export function Header() {
     });
     const navigate = useNavigate();
     const storeName = (publicSettings.storeName || BUSINESS.name).trim();
+    const logoUrl = publicSettings.logoUrl || "/logo.png";
     const storeNameWords = storeName.split(/\s+/);
     const mobileLastWord = storeNameWords.length > 1 ? storeNameWords[storeNameWords.length - 1] : storeName;
     const mobileLeadingWords = storeNameWords.length > 1 ? storeNameWords.slice(0, -1).join(" ") : "";
@@ -152,7 +154,7 @@ export function Header() {
                     <div className="absolute left-1/2 flex max-w-[50vw] -translate-x-1/2 items-center justify-center xl:static xl:translate-x-0 xl:max-w-none">
                         <Link to="/" className="flex items-center justify-center gap-2 sm:gap-3">
                             <img
-                                src="/logo.png"
+                                src={logoUrl}
                                 alt="Logo"
                                 className="h-8 w-auto flex-shrink-0 rounded-xl object-contain sm:h-10 lg:h-12"
                             />
@@ -248,33 +250,24 @@ export function Header() {
                             {searchOpen ? <X className="h-5 w-5 text-zinc-800" /> : <Search className="h-5 w-5 text-zinc-800" />}
                         </Button>
 
-                        <Sheet>
-                            <SheetTrigger asChild>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="rounded-none hover:bg-zinc-100">
                                     <Menu className="h-5 w-5 text-zinc-800" />
                                 </Button>
-                            </SheetTrigger>
-                            <SheetContent side="left" className="w-[85%] max-w-sm rounded-none border-none p-0" aria-describedby={undefined}>
-                                <SheetTitle className="sr-only">Main navigation menu</SheetTitle>
-                                <SheetDescription className="sr-only">
-                                    Browse pages like Home, Shop, Products, and Contact.
-                                </SheetDescription>
-                                <div className="bg-[#0F766E] p-4 text-white">
-                                    <span className="text-lg font-bold uppercase tracking-widest">Menu</span>
-                                </div>
-                                <nav className="flex flex-col p-4">
-                                    {navItems.map((item) => (
-                                        <Link
-                                            key={item.name}
-                                            to={item.href}
-                                            className="border-b border-zinc-100 py-4 text-xs font-bold uppercase tracking-widest text-zinc-800 hover:text-[#0F766E]"
-                                        >
-                                            {item.name}
-                                        </Link>
-                                    ))}
-                                </nav>
-                            </SheetContent>
-                        </Sheet>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                align="end"
+                                sideOffset={10}
+                                className="w-52 rounded-xl border-zinc-200 p-2 shadow-2xl"
+                            >
+                                {navItems.map((item) => (
+                                    <DropdownMenuItem key={item.name} asChild className="rounded-lg px-3 py-3 text-xs font-bold uppercase tracking-widest text-zinc-800 hover:bg-zinc-100 hover:text-[#0F766E]">
+                                        <Link to={item.href}>{item.name}</Link>
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
 

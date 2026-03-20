@@ -13,6 +13,7 @@ import type { Product } from "@/types";
 export function AdminInventoryPage() {
     const { getToken } = useAuth();
     const [products, setProducts] = useState<Product[]>([]);
+    const [stockDrafts, setStockDrafts] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [savingId, setSavingId] = useState<string | null>(null);
@@ -27,7 +28,11 @@ export function AdminInventoryPage() {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Failed to load inventory");
-            setProducts((data.items || []) as Product[]);
+            const items = (data.items || []) as Product[];
+            setProducts(items);
+            setStockDrafts(
+                Object.fromEntries(items.map((product) => [product.id, String(product.stockQty ?? 0)])),
+            );
         } catch (err: any) {
             toast.error(err.message || "Failed to load inventory");
         } finally {
@@ -39,8 +44,9 @@ export function AdminInventoryPage() {
         loadInventory();
     }, []);
 
-    const handleStockUpdate = (id: string, newStock: number) => {
-        setProducts(products.map(p => p.id === id ? { ...p, stockQty: newStock } : p));
+    const handleStockUpdate = (id: string, value: string) => {
+        setStockDrafts((prev) => ({ ...prev, [id]: value }));
+        setProducts(products.map(p => p.id === id ? { ...p, stockQty: value === "" ? p.stockQty : Number(value) } : p));
     };
 
     const saveStock = async (product: Product) => {
@@ -48,10 +54,16 @@ export function AdminInventoryPage() {
         try {
             const db = await getDbClient();
             if (!db) return;
+            const rawValue = stockDrafts[product.id] ?? String(product.stockQty ?? 0);
+            if (rawValue === "") throw new Error("Stock quantity is required");
+            const stockQty = Number(rawValue);
+            if (!Number.isFinite(stockQty) || stockQty < 0) throw new Error("Stock quantity must be 0 or more");
             await updateDoc(doc(db, "products", product.id), {
-                stockQty: product.stockQty,
+                stockQty,
                 updatedAt: new Date().toISOString()
             });
+            setProducts(products.map((p) => p.id === product.id ? { ...p, stockQty } : p));
+            setStockDrafts((prev) => ({ ...prev, [product.id]: String(stockQty) }));
             toast.success(`Stock level for "${product.name}" updated successfully.`);
         } catch (err: any) {
             toast.error("Failed to update stock: " + err.message);
@@ -117,6 +129,7 @@ export function AdminInventoryPage() {
                                 ) : (
                                     filteredProducts.map((product) => {
                                         const stockQty = typeof product.stockQty === "number" ? product.stockQty : 0;
+                                        const stockInputValue = stockDrafts[product.id] ?? String(stockQty);
                                         const isLowStock = stockQty < lowStockThreshold;
                                         const isOutOfStock = stockQty === 0;
 
@@ -149,8 +162,8 @@ export function AdminInventoryPage() {
                                                         type="number"
                                                         min="0"
                                                         className={`w-24 ${isOutOfStock ? "border-red-500/50 bg-red-50" : isLowStock ? "border-orange-500/50 bg-orange-50" : ""}`}
-                                                        value={stockQty}
-                                                        onChange={(e) => handleStockUpdate(product.id, Number(e.target.value))}
+                                                        value={stockInputValue}
+                                                        onChange={(e) => handleStockUpdate(product.id, e.target.value)}
                                                     />
                                                 </td>
                                                 <td className="p-4 text-right">

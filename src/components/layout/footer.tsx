@@ -1,6 +1,24 @@
+import { useEffect, useState } from "react";
 import { BUSINESS } from "@/lib/constants";
+import { fetchPublicSettings } from "@/lib/firestore";
 
 export function Footer() {
+    const [branding, setBranding] = useState({
+        storeName: BUSINESS.name,
+        logoUrl: "/logo.png",
+    });
+
+    useEffect(() => {
+        fetchPublicSettings()
+            .then((settings) => {
+                setBranding({
+                    storeName: settings.storeName || BUSINESS.name,
+                    logoUrl: settings.logoUrl || "/logo.png",
+                });
+            })
+            .catch(() => undefined);
+    }, []);
+
     return (
         <footer className="mt-12 bg-[#0F766E] text-white">
             {/* Footer Top Grid */}
@@ -8,9 +26,9 @@ export function Footer() {
                 {/* Column 1: Logo & About */}
                 <div className="flex flex-col items-center sm:items-start">
                     <a href="/" className="mb-6 flex items-center gap-3">
-                        <img src="/logo.png" alt={BUSINESS.name} className="h-12 w-auto flex-shrink-0 rounded-xl object-contain" />
+                        <img src={branding.logoUrl} alt={branding.storeName} className="h-12 w-auto flex-shrink-0 rounded-xl object-contain" />
                         <div className="flex flex-col">
-                            <span className="text-xl font-black uppercase tracking-tight text-white">{BUSINESS.name}</span>
+                            <span className="text-xl font-black uppercase tracking-tight text-white">{branding.storeName}</span>
                             <span className="text-[9px] font-semibold uppercase tracking-widest text-zinc-300">{BUSINESS.subtitle}</span>
                         </div>
                     </a>
@@ -47,7 +65,7 @@ export function Footer() {
             <div className="border-t border-white/20">
                 <div className="container mx-auto flex max-w-[1240px] items-center justify-center px-4 py-8">
                     <p className="text-[13px] text-zinc-300">
-                        {BUSINESS.name}
+                        {branding.storeName}
                         <br />
                         {BUSINESS.subtitle}. © 2026. All Rights Reserved
                     </p>

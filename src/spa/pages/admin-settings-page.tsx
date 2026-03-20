@@ -9,8 +9,20 @@ import { toast } from "sonner";
 import { useAuth } from "@/components/providers/auth-provider";
 import type { StoreSettings } from "@/types";
 
-const defaultSettings: StoreSettings = {
+type SettingsFormState = Omit<StoreSettings, "deliveryFee" | "announcementSpeed"> & {
+  deliveryFee: number | "";
+  announcementSpeed: number | "";
+};
+
+function parseNumberInput(value: string): number | "" {
+  if (value === "") return "";
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : "";
+}
+
+const defaultSettings: SettingsFormState = {
   storeName: "",
+  logoUrl: "",
   storeAddress: "",
   phone: "",
   email: "",
@@ -25,10 +37,11 @@ const defaultSettings: StoreSettings = {
 
 export function AdminSettingsPage() {
   const { getToken } = useAuth();
-  const [settings, setSettings] = useState<StoreSettings>(defaultSettings);
+  const [settings, setSettings] = useState<SettingsFormState>(defaultSettings);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -40,7 +53,12 @@ export function AdminSettingsPage() {
         });
         if (!res.ok) throw new Error("Failed to load settings");
         const data = await res.json();
-        setSettings(data.item || defaultSettings);
+        const item = data.item || defaultSettings;
+        setSettings({
+          ...item,
+          deliveryFee: item.deliveryFee ?? 0,
+          announcementSpeed: item.announcementSpeed ?? 20,
+        });
       } catch (err: any) {
         toast.error(err.message);
       } finally {
@@ -63,7 +81,11 @@ export function AdminSettingsPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({
+          ...settings,
+          deliveryFee: settings.deliveryFee === "" ? 0 : settings.deliveryFee,
+          announcementSpeed: settings.announcementSpeed === "" ? 20 : settings.announcementSpeed,
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to save settings");
@@ -120,6 +142,54 @@ export function AdminSettingsPage() {
       setUploadingHero(false);
       e.target.value = "";
       toast.error("Could not read image file");
+    };
+  };
+
+  const handleLogoUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const token = await getToken();
+    if (!token) {
+      toast.error("Unauthorized");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    setUploadingLogo(true);
+
+    reader.onload = async () => {
+      try {
+        const image = reader.result as string;
+        const res = await fetch("/api/admin/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ image }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to upload logo");
+
+        setSettings((prev) => ({
+          ...prev,
+          logoUrl: String(data.url || ""),
+        }));
+        toast.success("Logo uploaded.");
+      } catch (err: any) {
+        toast.error(err.message || "Failed to upload logo");
+      } finally {
+        setUploadingLogo(false);
+        e.target.value = "";
+      }
+    };
+
+    reader.onerror = () => {
+      setUploadingLogo(false);
+      e.target.value = "";
+      toast.error("Could not read logo file");
     };
   };
 
@@ -184,6 +254,55 @@ export function AdminSettingsPage() {
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ImagePlus className="h-5 w-5 text-muted-foreground" />
+              Site Logo
+            </CardTitle>
+            <CardDescription>Upload the logo shown in the storefront header and footer.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="flex h-28 w-40 items-center justify-center overflow-hidden rounded-md border bg-zinc-50 p-3">
+                <img
+                  src={settings.logoUrl || "/logo.png"}
+                  alt="Store logo preview"
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+
+              <div className="flex flex-1 flex-col gap-3">
+                <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-4 text-sm font-medium transition-colors hover:bg-zinc-100">
+                  {uploadingLogo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
+                  {uploadingLogo ? "Uploading..." : "Upload Logo"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleLogoUpload}
+                    disabled={uploadingLogo}
+                  />
+                </label>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSettings((prev) => ({ ...prev, logoUrl: "" }))}
+                  disabled={!settings.logoUrl || uploadingLogo}
+                  className="sm:w-fit"
+                >
+                  Remove Custom Logo
+                </Button>
+
+                <p className="text-xs text-muted-foreground">
+                  Leave this empty to fall back to the default logo bundled with the site.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="grid md:grid-cols-2 gap-6">
           {/* Contact & Social */}
           <Card>
@@ -227,8 +346,8 @@ export function AdminSettingsPage() {
                 <Input
                   type="number"
                   min="0"
-                  value={settings.deliveryFee || 0}
-                  onChange={(e) => setSettings({ ...settings, deliveryFee: Number(e.target.value) })}
+                  value={settings.deliveryFee}
+                  onChange={(e) => setSettings({ ...settings, deliveryFee: parseNumberInput(e.target.value) })}
                 />
                 <p className="text-xs text-muted-foreground">This fee is added to all checkout totals.</p>
               </div>
@@ -313,8 +432,8 @@ export function AdminSettingsPage() {
                   type="number"
                   min="8"
                   max="60"
-                  value={settings.announcementSpeed || 20}
-                  onChange={(e) => setSettings({ ...settings, announcementSpeed: Number(e.target.value) })}
+                  value={settings.announcementSpeed}
+                  onChange={(e) => setSettings({ ...settings, announcementSpeed: parseNumberInput(e.target.value) })}
                 />
               </div>
             </CardContent>

@@ -104,6 +104,7 @@ export type StatusEvent = {
 
 export type StoreSettings = {
   storeName: string;
+  logoUrl: string;
   storeAddress: string;
   phone: string;
   email: string;
