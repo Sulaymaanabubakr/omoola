@@ -1,6 +1,6 @@
-# Omoola Supermarket Stores
+# Omoola Pharmacy & Stores
 
-A full-stack e-commerce storefront for Omoola Supermarket Stores, built with **React + Vite** (frontend) and **Express** (backend API), deployed on **Vercel** as a serverless function, with **Firebase** for auth/database and **Paystack** for payments.
+A full-stack e-commerce storefront for Omoola Pharmacy & Stores, built with **React + Vite** (frontend) and **Express** (backend API), deployed on **Vercel** as a serverless function, with **Firebase** for auth/database and **Paystack** for payments.
 
 ---
 
@@ -93,20 +93,6 @@ These are embedded into the client bundle by Vite and are safe to expose.
 | `CORS_ORIGINS` | Comma-separated list of allowed origins, e.g. `https://yourapp.vercel.app` |
 | `APP_URL` | Canonical public URL of the app, e.g. `https://yourapp.vercel.app` |
 
-### Paystack
-| Variable | Description |
-|---|---|
-| `PAYSTACK_PUBLIC_KEY` | Paystack public key (used on frontend if needed) |
-| `PAYSTACK_SECRET_KEY` | Paystack secret key (**backend only — never expose to frontend**) |
-| `PAYSTACK_WEBHOOK_SECRET` | Optional explicit webhook secret. If omitted, the backend falls back to `PAYSTACK_SECRET_KEY`. |
-
-### Email
-| Variable | Description |
-|---|---|
-| `BREVO_API_KEY` | Brevo API key for transactional emails |
-| `EMAIL_FROM` | Sender address e.g. `Store Name <orders@yourdomain.com>` |
-| `EMAIL_FROM_NAME` | Optional fallback display name for transactional emails |
-
 ### Cloudinary
 | Variable | Description |
 |---|---|
@@ -180,4 +166,4 @@ This sets the `role: "admin"` field on the user's Firestore document, giving the
 
 ## License
 
-Private. All rights reserved — Omoola Supermarket Stores.
+Private. All rights reserved — Omoola Pharmacy & Stores.

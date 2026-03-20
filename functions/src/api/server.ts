@@ -16,10 +16,9 @@ if (fs.existsSync(envPath)) {
 import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
-import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import type { Request, Response } from "express";
 import { getAdminDb, getAdminAuth } from "../../../src/lib/firebase/admin";
-import { sendOrderEmail } from "../../../src/lib/email";
 import { checkoutSchema, statusUpdateSchema } from "../../../src/lib/schemas";
 import type { CartItem, Order } from "../../../src/types";
 import { getUserFromRequest, requireAdmin } from "./auth";
@@ -30,8 +29,6 @@ import { serializeStoreSettings, defaultStoreSettings } from "../../../src/lib/s
 const app = express();
 app.set("trust proxy", true);
 const PORT = Number(process.env.PORT || 3001);
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || "";
-const PAYSTACK_WEBHOOK_SECRET = process.env.PAYSTACK_WEBHOOK_SECRET || PAYSTACK_SECRET_KEY;
 
 const allowedOrigins = [
   ...(process.env.CORS_ORIGINS || "http://localhost:3000")
@@ -109,148 +106,35 @@ function normalizeStatusEvents(snapshot: FirebaseFirestore.QuerySnapshot<Firebas
     .sort((a, b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
 }
 
-function readReferenceHistory(order: Record<string, unknown>): string[] {
-  const payment = (order.payment || {}) as { referenceHistory?: unknown };
-  return Array.isArray(payment.referenceHistory)
-    ? payment.referenceHistory.map((value) => String(value || "")).filter(Boolean)
-    : [];
+function normalizeWhatsAppNumber(value: string) {
+  return value.replace(/[^\d]/g, "");
 }
 
-function dedupeStrings(values: Array<string | undefined | null>) {
-  return Array.from(new Set(values.map((value) => String(value || "").trim()).filter(Boolean)));
-}
+function buildWhatsAppUrl(order: Order, whatsappNumber: string) {
+  const orderLines = order.items.map(
+    (item) => `- ${item.name} x${item.qty} (${item.price.toLocaleString()} each)`,
+  );
+  const text = [
+    `Hello, I'd like to place an order with ${order.customer.name}.`,
+    `Order Number: ${order.orderNumber}`,
+    "",
+    "Items:",
+    ...orderLines,
+    "",
+    `Subtotal: NGN ${order.subtotal.toLocaleString()}`,
+    `Delivery Fee: NGN ${order.deliveryFee.toLocaleString()}`,
+    `Total: NGN ${order.total.toLocaleString()}`,
+    "",
+    "Delivery Address:",
+    `${order.shippingAddress.addressLine1}, ${order.shippingAddress.city}, ${order.shippingAddress.state}`,
+    `Phone: ${order.shippingAddress.phone}`,
+    `Email: ${order.customer.email}`,
+    order.shippingAddress.notes ? `Notes: ${order.shippingAddress.notes}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 
-async function resolveOrderForReference(reference: string, metadataOrderId?: string) {
-  if (metadataOrderId) {
-    const direct = await getAdminDb().collection("orders").doc(metadataOrderId).get();
-    if (direct.exists) return direct;
-  }
-
-  const byCurrentReference = await getAdminDb()
-    .collection("orders")
-    .where("payment.reference", "==", reference)
-    .limit(1)
-    .get();
-  if (!byCurrentReference.empty) return byCurrentReference.docs[0];
-
-  const byReferenceHistory = await getAdminDb()
-    .collection("orders")
-    .where("payment.referenceHistory", "array-contains", reference)
-    .limit(1)
-    .get();
-  if (!byReferenceHistory.empty) return byReferenceHistory.docs[0];
-
-  return null;
-}
-
-function verifyPaystackSignature(req: Request) {
-  const rawBody = (req as Request & { rawBody?: Buffer }).rawBody;
-  const signature = String(req.headers["x-paystack-signature"] || "");
-  if (!rawBody || !signature || !PAYSTACK_WEBHOOK_SECRET) return false;
-
-  const expected = createHmac("sha512", PAYSTACK_WEBHOOK_SECRET).update(rawBody).digest("hex");
-  const actualBuffer = Buffer.from(signature, "utf8");
-  const expectedBuffer = Buffer.from(expected, "utf8");
-  return actualBuffer.length === expectedBuffer.length && timingSafeEqual(actualBuffer, expectedBuffer);
-}
-
-async function finalizeVerifiedPayment(reference: string, verifyData: Record<string, any>) {
-  const metadataOrderId = String(verifyData?.data?.metadata?.orderId || "").trim();
-  const orderDoc = await resolveOrderForReference(reference, metadataOrderId);
-  if (!orderDoc) {
-    return { ok: false as const, status: 404, error: "No order found for payment reference" };
-  }
-
-  const orderRef = orderDoc.ref;
-  const orderId = orderDoc.id;
-  const orderData = orderDoc.data() as Record<string, unknown>;
-
-  if (metadataOrderId && metadataOrderId !== orderId) {
-    return { ok: false as const, status: 400, error: "Payment metadata does not match order reference" };
-  }
-
-  const expectedKobo = Math.round(Number(orderData.total || 0) * 100);
-  const paidKobo = Number(verifyData?.data?.amount || 0);
-  if (expectedKobo <= 0 || paidKobo !== expectedKobo) {
-    return { ok: false as const, status: 400, error: "Paid amount does not match order total" };
-  }
-
-  let paymentTransitioned = false;
-  let latestOrderData = orderData;
-
-  await getAdminDb().runTransaction(async (tx) => {
-    const latestOrderDoc = await tx.get(orderRef);
-    if (!latestOrderDoc.exists) throw new Error("Order no longer exists");
-
-    latestOrderData = latestOrderDoc.data() as Record<string, unknown>;
-    const latestPayment = (latestOrderData.payment as { status?: string; reference?: string } | undefined) || {};
-    const latestPaymentStatus = latestPayment.status || "unpaid";
-    const latestStatus = String(latestOrderData.status || "");
-    const history = readReferenceHistory(latestOrderData);
-    const nextHistory = dedupeStrings([latestPayment.reference, reference, ...history]);
-
-    if (latestPaymentStatus === "paid") {
-      tx.update(orderRef, {
-        "payment.reference": reference,
-        "payment.referenceHistory": nextHistory,
-        updatedAt: new Date().toISOString(),
-      });
-      return;
-    }
-
-    if (!(latestStatus === "pending" && latestPaymentStatus === "unpaid")) {
-      throw new Error("Order is not payable in its current status");
-    }
-
-    const items = Array.isArray(latestOrderData.items)
-      ? (latestOrderData.items as Array<{ productId?: string; qty?: number }>)
-      : [];
-
-    for (const item of items) {
-      const productId = String(item.productId || "");
-      const qty = Math.floor(Number(item.qty || 0));
-      if (!productId || qty < 1) throw new Error("Invalid order item while confirming payment");
-
-      const productRef = getAdminDb().collection("products").doc(productId);
-      const productDoc = await tx.get(productRef);
-      if (!productDoc.exists) throw new Error(`Product no longer exists: ${productId}`);
-
-      const product = productDoc.data() as { stockQty?: number; name?: string };
-      const currentStock = Number(product.stockQty || 0);
-      if (!Number.isFinite(currentStock) || currentStock < qty) {
-        throw new Error(`Insufficient stock for: ${product.name || productId}`);
-      }
-
-      tx.update(productRef, {
-        stockQty: currentStock - qty,
-        updatedAt: new Date().toISOString(),
-      });
-    }
-
-    const now = new Date().toISOString();
-    tx.update(orderRef, {
-      status: "confirmed",
-      "payment.reference": reference,
-      "payment.referenceHistory": nextHistory,
-      "payment.status": "paid",
-      "payment.paidAt": now,
-      updatedAt: now,
-    });
-    tx.set(orderRef.collection("statusEvents").doc(), {
-      status: "confirmed",
-      note: "Payment verified successfully via Paystack",
-      createdAt: now,
-    });
-    paymentTransitioned = true;
-  });
-
-  if (paymentTransitioned) {
-    const customerEmail = String(((latestOrderData.customer as Record<string, unknown> | undefined)?.email) || "");
-    const orderNumber = String(latestOrderData.orderNumber || orderId);
-    if (customerEmail) await sendOrderEmail(customerEmail, orderNumber).catch(() => undefined);
-  }
-
-  return { ok: true as const, orderId, paymentTransitioned };
+  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
 }
 
 app.get("/health", (_req, res) => {
@@ -402,9 +286,9 @@ app.post("/api/orders", publicWriteLimiter, async (req, res) => {
         notes: data.shippingAddress.notes,
       },
       payment: {
-        provider: "paystack",
+        provider: "whatsapp",
         reference: "",
-        status: "unpaid",
+        status: "pending",
       },
       status: "pending",
       createdAt: now,
@@ -418,15 +302,20 @@ app.post("/api/orders", publicWriteLimiter, async (req, res) => {
     await orderRef.set(sanitizedOrder);
     await orderRef.collection("statusEvents").add({
       status: "pending",
-      note: "Order created, waiting for payment",
+      note: "Order created, waiting for WhatsApp confirmation",
       createdAt: now,
     });
+
+    const storeSettings = serializeStoreSettings(settingsSnap.data() as Record<string, unknown> | undefined);
+    const whatsappNumber = normalizeWhatsAppNumber(storeSettings.whatsapp || "");
+    const whatsappUrl = whatsappNumber ? buildWhatsAppUrl(sanitizedOrder, whatsappNumber) : "";
 
     res.json({
       success: true,
       orderId: orderRef.id,
       orderNumber,
       amount: total,
+      whatsappUrl,
       adjustments: {
         missingProductIds,
         inactiveProductIds,
@@ -498,183 +387,6 @@ app.get("/api/orders/track", publicWriteLimiter, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: (error as Error).message });
-  }
-});
-
-app.post("/api/paystack/initialize", async (req, res) => {
-  try {
-    const { orderId, email, amount } = req.body as { orderId?: string; email?: string; amount?: number };
-    if (!orderId || !email) {
-      res.status(400).json({ success: false, error: "orderId and email are required." });
-      return;
-    }
-
-    if (!PAYSTACK_SECRET_KEY) {
-      res.status(500).json({ success: false, error: "Paystack secret key not configured." });
-      return;
-    }
-
-    const orderRef = getAdminDb().collection("orders").doc(String(orderId));
-    const orderDoc = await orderRef.get();
-    if (!orderDoc.exists) {
-      res.status(404).json({ success: false, error: "Order not found." });
-      return;
-    }
-
-    const order = orderDoc.data() as {
-      customer?: { email?: string };
-      total?: number;
-      payment?: { status?: string };
-    };
-
-    if ((order.payment?.status || "unpaid") === "paid") {
-      res.status(400).json({ success: false, error: "Order payment already completed." });
-      return;
-    }
-
-    const orderEmail = String(order.customer?.email || "").toLowerCase();
-    if (orderEmail && orderEmail !== String(email).toLowerCase()) {
-      res.status(400).json({ success: false, error: "Email does not match order." });
-      return;
-    }
-
-    const expectedAmount = Number(order.total || 0);
-    if (expectedAmount <= 0) {
-      res.status(400).json({ success: false, error: "Invalid order total." });
-      return;
-    }
-
-    if (amount !== undefined && Math.round(Number(amount)) !== Math.round(expectedAmount)) {
-      res.status(400).json({ success: false, error: "Amount does not match order total." });
-      return;
-    }
-
-    const amountInKobo = Math.round(expectedAmount * 100);
-    const baseUrl = process.env.APP_URL || allowedOrigins[0] || "http://localhost:3000";
-
-    const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        amount: amountInKobo,
-        metadata: { orderId },
-        callback_url: `${baseUrl}/checkout/verify`,
-      }),
-    });
-
-    const data = await paystackRes.json();
-    if (!data.status) {
-      res.status(400).json({ success: false, error: data.message });
-      return;
-    }
-
-    const newReference = String(data.data.reference || "");
-    const referenceHistory = dedupeStrings([
-      newReference,
-      ...readReferenceHistory(orderDoc.data() as Record<string, unknown>),
-      String((order.payment || {}).reference || ""),
-    ]);
-
-    await orderRef.update({
-      "payment.reference": newReference,
-      "payment.referenceHistory": referenceHistory,
-      updatedAt: new Date().toISOString(),
-    });
-
-    res.json({
-      success: true,
-      authorization_url: data.data.authorization_url,
-      reference: data.data.reference,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: (error as Error).message });
-  }
-});
-
-app.post("/api/paystack/verify", paymentVerifyLimiter, async (req, res) => {
-  try {
-    const { reference } = req.body as { reference?: string };
-    if (!reference) {
-      res.status(400).json({ success: false, error: "Missing reference" });
-      return;
-    }
-
-    if (!PAYSTACK_SECRET_KEY) {
-      res.status(500).json({ success: false, error: "Paystack secret key not configured." });
-      return;
-    }
-
-    const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
-    });
-
-    const verifyData = await verifyRes.json();
-    const verifyStatus = Boolean(verifyData?.status);
-    const paymentStatus = String(verifyData?.data?.status || "");
-    if (!verifyStatus || paymentStatus !== "success") {
-      res.status(400).json({ success: false, error: "Payment verification failed" });
-      return;
-    }
-
-    const finalized = await finalizeVerifiedPayment(reference, verifyData);
-    if (!finalized.ok) {
-      res.status(finalized.status).json({ success: false, error: finalized.error });
-      return;
-    }
-
-    res.json({ success: true, orderId: finalized.orderId });
-  } catch (error) {
-    const message = (error as Error).message;
-    console.error("[/api/paystack/verify] verify error:", error);
-    const statusCode =
-      message.includes("Insufficient stock") ||
-        message.includes("Product no longer exists") ||
-        message.includes("Order no longer exists") ||
-        message.includes("Order is not payable") ||
-        message.includes("Invalid order item")
-        ? 409
-        : 500;
-    res.status(statusCode).json({
-      success: false,
-      error: message || "Payment verification failed due to an unexpected server error.",
-    });
-  }
-});
-
-app.post("/api/paystack/webhook", async (req, res) => {
-  try {
-    if (!verifyPaystackSignature(req)) {
-      res.status(401).json({ success: false, error: "Invalid webhook signature" });
-      return;
-    }
-
-    const event = req.body as { event?: string; data?: Record<string, unknown> };
-    if (event.event !== "charge.success") {
-      res.status(200).json({ success: true, ignored: true });
-      return;
-    }
-
-    const reference = String(event.data?.reference || "").trim();
-    if (!reference) {
-      res.status(400).json({ success: false, error: "Missing payment reference" });
-      return;
-    }
-
-    const finalized = await finalizeVerifiedPayment(reference, req.body as Record<string, any>);
-    if (!finalized.ok) {
-      res.status(finalized.status).json({ success: false, error: finalized.error });
-      return;
-    }
-
-    res.status(200).json({ success: true, orderId: finalized.orderId });
-  } catch (error) {
-    console.error("[/api/paystack/webhook] error:", error);
-    res.status(500).json({ success: false, error: "Webhook processing failed" });
   }
 });
 
@@ -817,7 +529,7 @@ app.get("/api/admin/dashboard", async (req, res) => {
     const totalOrders = allOrders.length;
     const pendingOrders = allOrders.filter((order) => order.status === "pending").length;
     const totalSales = allOrders
-      .filter((order) => order.payment?.status === "paid" || order.status === "delivered")
+      .filter((order) => ["confirmed", "packed", "shipped", "delivered"].includes(order.status))
       .reduce((sum, order) => sum + (order.total || 0), 0);
     const recentOrders = [...allOrders]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())

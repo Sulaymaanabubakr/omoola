@@ -14,14 +14,10 @@ const required = [
   "FIREBASE_PROJECT_ID",
   "FIREBASE_CLIENT_EMAIL",
   "FIREBASE_PRIVATE_KEY",
-  "PAYSTACK_PUBLIC_KEY",
-  "PAYSTACK_SECRET_KEY",
   "APP_URL",
   "CLOUDINARY_CLOUD_NAME",
   "CLOUDINARY_API_KEY",
   "CLOUDINARY_API_SECRET",
-  "BREVO_API_KEY",
-  "EMAIL_FROM",
 ];
 
 const missing = required.filter((key) => !process.env[key] || process.env[key] === "");

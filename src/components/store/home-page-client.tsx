@@ -80,7 +80,7 @@ export function HomePageClient({
           >
             <img
               src={activeHeroImages[heroIndex]}
-              alt="Omoola Supermarket Stores Hero"
+              alt="Omoola Pharmacy & Stores Hero"
               className="h-full w-full object-cover opacity-50 mix-blend-overlay"
               loading="eager"
             />

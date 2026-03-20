@@ -86,9 +86,9 @@ export type Order = {
     notes?: string;
   };
   payment: {
-    provider: "paystack";
+    provider: "whatsapp";
     reference: string;
-    status: "paid" | "unpaid";
+    status: "pending" | "paid" | "unpaid";
     paidAt?: string;
   };
   status: OrderStatus;

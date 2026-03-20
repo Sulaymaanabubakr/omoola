@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-const WISHLIST_KEY = "omoola-supermarket-stores-wishlist-v1";
+const WISHLIST_KEY = "omoola-pharmacy-and-stores-wishlist-v1";
 
 type WishlistContextType = {
     ids: string[];

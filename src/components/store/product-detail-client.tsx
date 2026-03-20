@@ -88,7 +88,7 @@ export function ProductDetailClient({ product }: { product: Product | null }) {
                 <span className="text-3xl font-black text-[#0F766E]">{formatCurrency(product.price)}</span>
               </div>
               <p className="mt-4 text-[13px] leading-relaxed text-zinc-600">
-                {product.description || "Premium quality product from Omoola Supermarket Stores, curated for excellence."}
+                {product.description || "Premium quality product from Omoola Pharmacy & Stores, curated for excellence."}
               </p>
             </div>
 

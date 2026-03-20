@@ -3,6 +3,7 @@ import { LogOut, Menu } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { BUSINESS } from "@/lib/constants";
+import { usePublicStoreSettings } from "@/hooks/use-public-store-settings";
 
 interface AdminTopbarProps {
     onMenuClick: () => void;
@@ -10,6 +11,8 @@ interface AdminTopbarProps {
 
 export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
     const { profile, logout } = useAuth();
+    const settings = usePublicStoreSettings();
+    const storeName = settings.storeName || BUSINESS.name;
 
     return (
         <header className="sticky top-0 z-40 flex h-16 w-full shrink-0 items-center justify-between border-b bg-background px-4 shadow-sm sm:px-6 lg:px-8">
@@ -18,7 +21,7 @@ export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                     <Menu className="h-6 w-6" />
                 </Button>
                 <Link to="/admin" className="font-semibold md:text-lg">
-                    {BUSINESS.name} Admin
+                    {storeName} Admin
                 </Link>
             </div>
 

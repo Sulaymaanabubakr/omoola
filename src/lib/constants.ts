@@ -1,7 +1,7 @@
 export const BUSINESS = {
-  name: "Omoola Supermarket Stores",
-  subtitle: "Omoola Supermarket Stores",
-  landmark: "Omoola Supermarket Stores",
+  name: "Omoola Pharmacy & Stores",
+  subtitle: "Omoola Pharmacy & Stores",
+  landmark: "Omoola Pharmacy & Stores",
   address: "21/22 Akinosho Street, Off Afariogun, Along Airport Road, Oshodi, Lagos, Nigeria",
   phone: "07063006033",
   email: "madonnaexpresslinkventure@gmail.com",

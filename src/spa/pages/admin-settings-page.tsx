@@ -231,7 +231,7 @@ export function AdminSettingsPage() {
               <Input
                 value={settings.storeName || ""}
                 onChange={(e) => setSettings({ ...settings, storeName: e.target.value })}
-                placeholder="Omoola Supermarket Stores"
+                placeholder="Omoola Pharmacy & Stores"
               />
             </div>
             <div className="space-y-2">

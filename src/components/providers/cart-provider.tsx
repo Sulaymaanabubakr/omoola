@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { CartItem } from "@/types";
 
-const CART_KEY = "omoola-supermarket-stores-cart-v1";
+const CART_KEY = "omoola-pharmacy-and-stores-cart-v1";
 
 type CartContextType = {
   items: CartItem[];

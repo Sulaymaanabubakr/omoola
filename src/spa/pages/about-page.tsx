@@ -1,8 +1,12 @@
 import { BUSINESS } from "@/lib/constants";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
+import { usePublicStoreSettings } from "@/hooks/use-public-store-settings";
 
 export function AboutPage() {
+  const settings = usePublicStoreSettings();
+  const storeName = settings.storeName || BUSINESS.name;
+
   return (
     <div className="bg-white">
       <div className="border-b border-zinc-100 bg-[#F4F4F4]">
@@ -26,7 +30,7 @@ export function AboutPage() {
           </h2>
           <div className="mx-auto mb-8 mt-4 h-[2px] w-[50px] bg-[#0F766E]" />
           <p className="text-sm leading-relaxed text-zinc-600 md:text-base md:leading-loose">
-            At {BUSINESS.name}, we believe that premium quality products should not be out of reach. Located in
+            At {storeName}, we believe that premium quality products should not be out of reach. Located in
             the heart of Oshodi, Lagos, our mission is to deliver an exceptional shopping experience spanning Fashion,
             Beauty, and Groceries. Every item in our catalog is meticulously sourced and curated to ensure you get
             exactly what you desire, without compromise.

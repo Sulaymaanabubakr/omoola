@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { BUSINESS } from "@/lib/constants";
-import { fetchPublicSettings } from "@/lib/firestore";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useCart } from "@/components/providers/cart-provider";
 import { useWishlist } from "@/components/providers/wishlist-provider";
 import { Badge } from "@/components/ui/badge";
 import { CartDrawer } from "@/components/store/cart-drawer";
 import { formatCurrency } from "@/lib/query";
+import { usePublicStoreSettings } from "@/hooks/use-public-store-settings";
 
 const navItems = [
     { name: "HOME", href: "/" },
@@ -36,28 +36,21 @@ export function Header() {
     const { count: wishlistCount } = useWishlist();
     const [query, setQuery] = useState("");
     const [searchOpen, setSearchOpen] = useState(false);
-    const [publicSettings, setPublicSettings] = useState<PublicHeaderSettings>({
-        storeName: BUSINESS.name,
-        logoUrl: "/logo.png",
-        phone: BUSINESS.phone,
-        announcementEnabled: false,
-        announcementText: "",
-        announcementSpeed: 22,
-    });
+    const settings = usePublicStoreSettings();
+    const publicSettings: PublicHeaderSettings = {
+        storeName: settings.storeName || BUSINESS.name,
+        logoUrl: settings.logoUrl || "/logo.png",
+        phone: settings.phone || BUSINESS.phone,
+        announcementEnabled: Boolean(settings.announcementEnabled),
+        announcementText: settings.announcementText || "",
+        announcementSpeed: settings.announcementSpeed || 22,
+    };
     const navigate = useNavigate();
     const storeName = (publicSettings.storeName || BUSINESS.name).trim();
     const logoUrl = publicSettings.logoUrl || "/logo.png";
     const storeNameWords = storeName.split(/\s+/);
     const mobileLastWord = storeNameWords.length > 1 ? storeNameWords[storeNameWords.length - 1] : storeName;
     const mobileLeadingWords = storeNameWords.length > 1 ? storeNameWords.slice(0, -1).join(" ") : "";
-
-    useEffect(() => {
-        fetchPublicSettings().then((settings) => {
-            setPublicSettings((prev) => ({ ...prev, ...settings }));
-        }).catch(() => {
-            // Keep defaults from constants if loading fails.
-        });
-    }, []);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -171,7 +164,7 @@ export function Header() {
                                     )}
                                 </span>
                                 <span className="text-[8px] font-semibold uppercase tracking-widest text-zinc-500 sm:text-[10px]">
-                                    {BUSINESS.subtitle}
+                                    {storeName}
                                 </span>
                             </div>
                         </Link>

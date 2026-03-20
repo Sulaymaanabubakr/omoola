@@ -128,7 +128,7 @@ async function seed100() {
             id: docRef.id,
             name: item.name,
             slug: slug,
-            description: `Premium quality ${item.name} sourced directly for Omoola Supermarket Stores. Authentic and top grade.`,
+            description: `Premium quality ${item.name} sourced directly for Omoola Pharmacy & Stores. Authentic and top grade.`,
             price: item.price,
             categoryId: item.categoryId,
             categoryName: item.categoryName,

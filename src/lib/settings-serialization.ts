@@ -49,7 +49,7 @@ export const defaultStoreSettings: StoreSettings = {
   heroImages: defaultHeroImages,
   deliveryFee: 2000,
   announcementEnabled: true,
-  announcementText: "Welcome to Omoola Supermarket Stores. Shop quality products with confidence.",
+  announcementText: "Welcome to Omoola Pharmacy & Stores. Shop quality products with confidence.",
   announcementSpeed: 22,
   updatedAt: new Date().toISOString(),
 };

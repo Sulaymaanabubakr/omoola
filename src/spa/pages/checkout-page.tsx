@@ -35,7 +35,7 @@ type CheckoutItemPayload = {
 
 export function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, subtotal, removeItem, setQty } = useCart();
+  const { items, subtotal, removeItem, setQty, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [serverTotal, setServerTotal] = useState<number | null>(null);
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<CheckoutValues>({
@@ -194,24 +194,12 @@ export function CheckoutPage() {
 
       // Use the server-calculated total (includes delivery fee from store settings)
       setServerTotal(amount);
-
-      const paystackRes = await fetch("/api/paystack/initialize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          email: data.email,
-          amount,
-        }),
-      });
-      const paystackData = await readJsonSafe(paystackRes);
-      if (!paystackRes.ok || !paystackData.success) {
-        throw new Error(String(paystackData.error || "Failed to initialize payment"));
+      const whatsappUrl = String(orderData.whatsappUrl || "");
+      if (!whatsappUrl) {
+        throw new Error("WhatsApp ordering is not configured for this store.");
       }
-
-      const authorizationUrl = String(paystackData.authorization_url || "");
-      if (!authorizationUrl) throw new Error("Missing Paystack authorization URL");
-      window.location.href = authorizationUrl;
+      clearCart();
+      window.location.href = whatsappUrl;
     } catch (err) {
       toast.error((err as Error).message || "A checkout error occurred.");
       setIsProcessing(false);
@@ -309,7 +297,7 @@ export function CheckoutPage() {
                 </div>
               </div>
               <Button type="submit" disabled={isProcessing} className="mt-6 h-14 w-full rounded-none bg-[#222222] text-[13px] font-bold uppercase tracking-[0.1em] text-white hover:bg-[#0F766E]">
-                {isProcessing ? "Processing..." : "Place Order"}
+                {isProcessing ? "Preparing WhatsApp..." : "Order via WhatsApp"}
               </Button>
             </div>
           </div>

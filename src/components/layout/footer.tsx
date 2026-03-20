@@ -1,23 +1,12 @@
-import { useEffect, useState } from "react";
 import { BUSINESS } from "@/lib/constants";
-import { fetchPublicSettings } from "@/lib/firestore";
+import { usePublicStoreSettings } from "@/hooks/use-public-store-settings";
 
 export function Footer() {
-    const [branding, setBranding] = useState({
-        storeName: BUSINESS.name,
-        logoUrl: "/logo.png",
-    });
-
-    useEffect(() => {
-        fetchPublicSettings()
-            .then((settings) => {
-                setBranding({
-                    storeName: settings.storeName || BUSINESS.name,
-                    logoUrl: settings.logoUrl || "/logo.png",
-                });
-            })
-            .catch(() => undefined);
-    }, []);
+    const settings = usePublicStoreSettings();
+    const branding = {
+        storeName: settings.storeName || BUSINESS.name,
+        logoUrl: settings.logoUrl || "/logo.png",
+    };
 
     return (
         <footer className="mt-12 bg-[#0F766E] text-white">
@@ -29,7 +18,7 @@ export function Footer() {
                         <img src={branding.logoUrl} alt={branding.storeName} className="h-12 w-auto flex-shrink-0 rounded-xl object-contain" />
                         <div className="flex flex-col">
                             <span className="text-xl font-black uppercase tracking-tight text-white">{branding.storeName}</span>
-                            <span className="text-[9px] font-semibold uppercase tracking-widest text-zinc-300">{BUSINESS.subtitle}</span>
+                            <span className="text-[9px] font-semibold uppercase tracking-widest text-zinc-300">{branding.storeName}</span>
                         </div>
                     </a>
                     <p className="text-sm leading-relaxed text-zinc-300">
@@ -67,7 +56,7 @@ export function Footer() {
                     <p className="text-[13px] text-zinc-300">
                         {branding.storeName}
                         <br />
-                        {BUSINESS.subtitle}. © 2026. All Rights Reserved
+                        {branding.storeName}. © 2026. All Rights Reserved
                     </p>
                 </div>
             </div>
