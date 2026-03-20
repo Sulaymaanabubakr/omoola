@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "start:api": "npm run dev:api",
-    "seed": "tsx scripts/seed.ts",
+    "seed": "tsx scripts/seed-products.ts",
+    "seed:sample": "tsx scripts/seed.ts",
     "make-admin": "tsx scripts/make-admin.ts",
     "doctor": "tsx scripts/doctor.ts"
   },
