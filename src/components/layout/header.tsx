@@ -95,7 +95,7 @@ export function Header() {
 
             {/* ── Main White Header ── */}
             <div className="border-b bg-white shadow-sm">
-                <div className="container relative mx-auto flex h-[64px] items-center justify-between px-4 sm:h-[72px] lg:h-[80px]">
+                <div className="container relative mx-auto flex h-[64px] items-center justify-between overflow-hidden px-4 sm:h-[72px] lg:h-[80px]">
                     {/* Mobile Left: Account + Cart */}
                     <div className="absolute left-4 flex items-center gap-1 md:hidden">
                         {user ? (
@@ -144,26 +144,26 @@ export function Header() {
                     </nav>
 
                     {/* Center Logo */}
-                    <div className="absolute left-1/2 flex max-w-[50vw] -translate-x-1/2 items-center justify-center xl:static xl:translate-x-0 xl:max-w-none">
-                        <Link to="/" className="flex items-center justify-center gap-2 sm:gap-3">
+                    <div className="absolute left-1/2 flex w-[calc(100vw-136px)] max-w-[220px] -translate-x-1/2 items-center justify-center sm:max-w-[50vw] xl:static xl:w-auto xl:translate-x-0 xl:max-w-none">
+                        <Link to="/" className="flex min-w-0 items-center justify-center gap-2 sm:gap-3">
                             <img
                                 src={logoUrl}
                                 alt="Logo"
                                 className="h-8 w-auto flex-shrink-0 rounded-xl object-contain sm:h-10 lg:h-12"
                             />
-                            <div className="flex flex-col text-center">
+                            <div className="flex min-w-0 flex-col text-center">
                                 <span className="block truncate font-sans text-sm font-black uppercase leading-tight tracking-tight text-zinc-900 sm:text-2xl lg:text-3xl">
                                     {mobileLeadingWords ? (
                                         <>
-                                            <span className="sm:hidden">{mobileLeadingWords}</span>
-                                            <span className="block sm:hidden">{mobileLastWord}</span>
+                                            <span className="block truncate sm:hidden">{mobileLeadingWords}</span>
+                                            <span className="block truncate sm:hidden">{mobileLastWord}</span>
                                             <span className="hidden sm:inline">{storeName}</span>
                                         </>
                                     ) : (
                                         storeName
                                     )}
                                 </span>
-                                <span className="text-[8px] font-semibold uppercase tracking-widest text-zinc-500 sm:text-[10px]">
+                                <span className="block truncate text-[8px] font-semibold uppercase tracking-[0.18em] text-zinc-500 sm:text-[10px]">
                                     {storeName}
                                 </span>
                             </div>
