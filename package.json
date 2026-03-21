@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev:web": "vite",
-    "dev:api": "cd functions && npm run serve:local",
+    "dev:api": "sh -c 'kill $(lsof -tiTCP:3101 -sTCP:LISTEN) 2>/dev/null || true; cd functions && npm run serve:local'",
     "dev": "concurrently -k \"npm:dev:api\" \"npm:dev:web\"",
     "build": "vite build",
     "preview": "vite preview",
