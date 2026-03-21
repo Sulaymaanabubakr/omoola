@@ -9,7 +9,7 @@ export function Footer() {
     };
 
     return (
-        <footer className="mt-12 bg-[#0F766E] text-white">
+        <footer className="mt-12 bg-[#7C3AED] text-white">
             {/* Footer Top Grid */}
             <div className="container mx-auto grid max-w-[1240px] gap-8 px-4 py-16 text-center sm:text-left lg:grid-cols-4">
                 {/* Column 1: Logo & About */}
@@ -32,9 +32,9 @@ export function Footer() {
                         SOCIAL MEDIA
                     </h4>
                     <div className="flex justify-center gap-2 text-zinc-200 sm:justify-start">
-                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-[#0F766E] hover:text-white">f</a>
-                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-[#0F766E] hover:text-white">𝕏</a>
-                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-[#0F766E] hover:text-white">in</a>
+                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-[#7C3AED] hover:text-white">f</a>
+                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-[#7C3AED] hover:text-white">𝕏</a>
+                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-[#7C3AED] hover:text-white">in</a>
                     </div>
 
                     <h4 className="mb-4 mt-8 text-[13px] font-bold uppercase tracking-widest text-zinc-100">

@@ -31,7 +31,7 @@ export function WishlistPage() {
                     <div className="flex flex-col items-center justify-center gap-2">
                         <h1 className="text-4xl font-black uppercase tracking-widest text-zinc-900">WISHLIST</h1>
                         <div className="flex items-center text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                            <Link to="/" className="hover:text-[#0F766E]">HOME</Link>
+                            <Link to="/" className="hover:text-[#7C3AED]">HOME</Link>
                             <ChevronRight className="mx-2 h-3 w-3" />
                             <span className="text-zinc-900">WISHLIST</span>
                         </div>
@@ -49,7 +49,7 @@ export function WishlistPage() {
                 ) : products.length === 0 ? (
                     <div className="border border-zinc-200 bg-white p-12 text-center">
                         <p className="text-[13px] text-zinc-500">Your wishlist is empty.</p>
-                        <Button asChild className="mt-6 rounded-none bg-[#0F766E] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#115E59]">
+                        <Button asChild className="mt-6 rounded-none bg-[#7C3AED] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#EA580C]">
                             <Link to="/shop">Browse Products</Link>
                         </Button>
                     </div>

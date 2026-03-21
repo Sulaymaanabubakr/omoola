@@ -56,7 +56,7 @@ export function TrackOrderPage() {
           <div className="flex flex-col items-center justify-center gap-2">
             <h1 className="text-4xl font-black uppercase tracking-widest text-zinc-900">TRACK ORDER</h1>
             <div className="flex items-center text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              <Link to="/account" className="hover:text-[#0F766E]">MY ACCOUNT</Link>
+              <Link to="/account" className="hover:text-[#7C3AED]">MY ACCOUNT</Link>
               <ChevronRight className="mx-2 h-3 w-3" />
               <span className="text-zinc-900">#{order.orderNumber}</span>
             </div>
@@ -69,7 +69,7 @@ export function TrackOrderPage() {
           <div className="mb-8 border border-zinc-200 bg-white p-8 shadow-sm">
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
               <div><p className="text-[12px] font-bold uppercase tracking-widest text-zinc-500">Order Reference</p><p className="text-xl font-black text-zinc-900">{order.orderNumber}</p></div>
-              <div className="flex gap-8"><div><p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Date</p><p className="text-[13px] font-bold text-zinc-900">{new Date(order.createdAt).toLocaleDateString()}</p></div><div><p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Total Amount</p><p className="text-[13px] font-bold text-[#0F766E]">{formatCurrency(order.total)}</p></div></div>
+              <div className="flex gap-8"><div><p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Date</p><p className="text-[13px] font-bold text-zinc-900">{new Date(order.createdAt).toLocaleDateString()}</p></div><div><p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Total Amount</p><p className="text-[13px] font-bold text-[#7C3AED]">{formatCurrency(order.total)}</p></div></div>
             </div>
           </div>
 

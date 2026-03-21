@@ -65,7 +65,7 @@ export function ShopPageClient({
               {categories.find((c) => c.id === category)?.name || "SHOP"}
             </h1>
             <div className="flex items-center text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              <Link to="/" className="hover:text-[#0F766E]">HOME</Link>
+              <Link to="/" className="hover:text-[#7C3AED]">HOME</Link>
               <ChevronRight className="mx-2 h-3 w-3" />
               <span className="text-zinc-900">SHOP</span>
             </div>
@@ -84,7 +84,7 @@ export function ShopPageClient({
                   <li key={cat.id}>
                     <button
                       onClick={() => { setCategory(cat.id); setPage(1); }}
-                      className={`flex w-full items-center justify-between text-left text-[13px] font-semibold transition-colors hover:text-[#0F766E] ${category === cat.id ? "text-[#0F766E]" : "text-zinc-600"}`}
+                      className={`flex w-full items-center justify-between text-left text-[13px] font-semibold transition-colors hover:text-[#7C3AED] ${category === cat.id ? "text-[#7C3AED]" : "text-zinc-600"}`}
                     >
                       {cat.name}
                     </button>
@@ -103,7 +103,7 @@ export function ShopPageClient({
                   placeholder="Keyword..."
                   className="h-10 rounded-none border-none text-[13px]"
                 />
-                <Button onClick={() => setPage(1)} className="h-10 rounded-none bg-[#0F766E] px-4 hover:bg-[#115E59]">
+                <Button onClick={() => setPage(1)} className="h-10 rounded-none bg-[#7C3AED] px-4 hover:bg-[#EA580C]">
                   <Search className="h-4 w-4 text-white" />
                 </Button>
               </div>
@@ -144,7 +144,7 @@ export function ShopPageClient({
               <div className="py-16 text-center">
                 <p className="text-[13px] text-zinc-500">No products found matching your selection.</p>
                 <Button
-                  className="mt-8 rounded-none bg-[#0F766E] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#115E59]"
+                  className="mt-8 rounded-none bg-[#7C3AED] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#EA580C]"
                   onClick={() => { setQ(""); setCategory("all"); }}
                 >
                   Clear Filters
@@ -155,9 +155,9 @@ export function ShopPageClient({
             {totalPages > 1 && (
               <div className="mt-12 flex justify-center border-t border-zinc-200 pt-8">
                 <div className="flex gap-1">
-                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="flex h-10 w-10 items-center justify-center border border-zinc-300 bg-white text-zinc-900 transition-colors hover:bg-[#0F766E] hover:text-white disabled:opacity-50">{"<"}</button>
-                  <span className="flex h-10 w-10 items-center justify-center border border-[#0F766E] bg-[#0F766E] text-xs font-bold text-white">{page}</span>
-                  <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="flex h-10 w-10 items-center justify-center border border-zinc-300 bg-white text-zinc-900 transition-colors hover:bg-[#0F766E] hover:text-white disabled:opacity-50">{">"}</button>
+                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} className="flex h-10 w-10 items-center justify-center border border-zinc-300 bg-white text-zinc-900 transition-colors hover:bg-[#7C3AED] hover:text-white disabled:opacity-50">{"<"}</button>
+                  <span className="flex h-10 w-10 items-center justify-center border border-[#7C3AED] bg-[#7C3AED] text-xs font-bold text-white">{page}</span>
+                  <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="flex h-10 w-10 items-center justify-center border border-zinc-300 bg-white text-zinc-900 transition-colors hover:bg-[#7C3AED] hover:text-white disabled:opacity-50">{">"}</button>
                 </div>
               </div>
             )}

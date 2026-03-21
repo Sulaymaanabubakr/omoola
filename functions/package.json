@@ -4,10 +4,7 @@
     "lint": "eslint --ext .js,.ts .",
     "build": "npx esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=lib/index.js --external:firebase-admin --external:firebase-functions --external:express --external:cors --external:cloudinary --external:dotenv --format=cjs",
     "build:watch": "npx esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=lib/index.js --external:firebase-admin --external:firebase-functions --external:express --external:cors --external:cloudinary --external:dotenv --format=cjs --watch",
-    "serve": "npm run build && firebase emulators:start --only functions,auth",
-    "serve:full": "npm run build && firebase emulators:start --only functions,auth,firestore",
-    "shell": "npm run build && firebase functions:shell",
-    "start": "npm run shell",
+    "serve:local": "tsx src/local.ts",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
   },

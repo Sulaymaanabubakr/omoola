@@ -17,7 +17,7 @@ export function CheckoutVerifyPage() {
           <p className="mt-2 text-[13px] text-zinc-600">
             Orders are now completed through WhatsApp chat with the store.
           </p>
-          <Button asChild className="mt-8 h-12 rounded-none bg-[#222222] px-8 text-[12px] font-bold uppercase tracking-widest text-white hover:bg-[#0F766E]">
+          <Button asChild className="mt-8 h-12 rounded-none bg-[#222222] px-8 text-[12px] font-bold uppercase tracking-widest text-white hover:bg-[#7C3AED]">
             <Link to="/account">View My Orders</Link>
           </Button>
         </div>

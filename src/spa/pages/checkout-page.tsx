@@ -213,7 +213,7 @@ export function CheckoutPage() {
           <div className="flex flex-col items-center justify-center gap-2">
             <h1 className="text-4xl font-black uppercase tracking-widest text-zinc-900">CHECKOUT</h1>
             <div className="flex items-center text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              <Link to="/" className="hover:text-[#0F766E]">HOME</Link>
+              <Link to="/" className="hover:text-[#7C3AED]">HOME</Link>
               <ChevronRight className="mx-2 h-3 w-3" />
               <span className="text-zinc-900">CHECKOUT</span>
             </div>
@@ -225,49 +225,49 @@ export function CheckoutPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">
             <h3 className="mb-4 text-xl font-bold uppercase tracking-widest text-zinc-900">Billing Details</h3>
-            <div className="mb-8 h-[2px] w-[50px] bg-[#0F766E]" />
+            <div className="mb-8 h-[2px] w-[50px] bg-[#7C3AED]" />
 
             <div className="space-y-6 border border-zinc-200 bg-white p-8 shadow-sm">
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-[12px] font-bold text-zinc-700">First Name *</label>
-                  <Input {...register("firstName")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" />
+                  <Input {...register("firstName")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" />
                   {errors.firstName && <p className="text-xs text-red-500">{errors.firstName.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[12px] font-bold text-zinc-700">Last Name *</label>
-                  <Input {...register("lastName")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" />
+                  <Input {...register("lastName")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" />
                   {errors.lastName && <p className="text-xs text-red-500">{errors.lastName.message}</p>}
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-[12px] font-bold text-zinc-700">Phone *</label>
-                <Input {...register("phone")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" />
+                <Input {...register("phone")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" />
                 {errors.phone && <p className="text-xs text-red-500">{errors.phone.message}</p>}
               </div>
 
               <div className="space-y-2">
                 <label className="text-[12px] font-bold text-zinc-700">Email Address *</label>
-                <Input {...register("email")} type="email" className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" />
+                <Input {...register("email")} type="email" className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" />
                 {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
               </div>
 
               <div className="space-y-2">
                 <label className="text-[12px] font-bold text-zinc-700">Street Address *</label>
-                <Input {...register("address")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" />
+                <Input {...register("address")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" />
                 {errors.address && <p className="text-xs text-red-500">{errors.address.message}</p>}
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-[12px] font-bold text-zinc-700">Town / City *</label>
-                  <Input {...register("city")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" />
+                  <Input {...register("city")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" />
                   {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[12px] font-bold text-zinc-700">State *</label>
-                  <Input {...register("state")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" />
+                  <Input {...register("state")} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" />
                   {errors.state && <p className="text-xs text-red-500">{errors.state.message}</p>}
                 </div>
               </div>
@@ -275,7 +275,7 @@ export function CheckoutPage() {
           </div>
 
           <div className="lg:col-span-5">
-            <div className="sticky top-24 border border-zinc-200 border-t-[3px] border-t-[#0F766E] bg-white p-8 shadow-sm">
+            <div className="sticky top-24 border border-zinc-200 border-t-[3px] border-t-[#7C3AED] bg-white p-8 shadow-sm">
               <h3 className="mb-6 text-xl font-bold uppercase tracking-widest text-zinc-900">Your Order</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-zinc-200 pb-2 text-[12px] font-bold uppercase tracking-widest text-zinc-900">
@@ -293,10 +293,10 @@ export function CheckoutPage() {
                   <span>Subtotal</span><span className="text-[15px]">{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex items-center justify-between py-4 text-xl font-bold uppercase tracking-widest text-zinc-900">
-                  <span>Total</span><span className="text-[#0F766E]">{formatCurrency(serverTotal ?? subtotal)}</span>
+                  <span>Total</span><span className="text-[#7C3AED]">{formatCurrency(serverTotal ?? subtotal)}</span>
                 </div>
               </div>
-              <Button type="submit" disabled={isProcessing} className="mt-6 h-14 w-full rounded-none bg-[#222222] text-[13px] font-bold uppercase tracking-[0.1em] text-white hover:bg-[#0F766E]">
+              <Button type="submit" disabled={isProcessing} className="mt-6 h-14 w-full rounded-none bg-[#222222] text-[13px] font-bold uppercase tracking-[0.1em] text-white hover:bg-[#7C3AED]">
                 {isProcessing ? "Preparing WhatsApp..." : "Order via WhatsApp"}
               </Button>
             </div>

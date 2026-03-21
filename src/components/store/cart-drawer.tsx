@@ -28,7 +28,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                         Review selected items, adjust quantities, and proceed to checkout.
                     </SheetDescription>
                     <div className="flex items-center justify-between">
-                        <SheetTitle className="font-serif text-xl font-bold uppercase tracking-widest text-[#0F766E]">
+                        <SheetTitle className="font-serif text-xl font-bold uppercase tracking-widest text-[#7C3AED]">
                             Shopping Cart
                         </SheetTitle>
                         <SheetClose asChild>
@@ -54,7 +54,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                                 <p className="text-sm text-zinc-500">Looks like you haven't added anything yet.</p>
                             </div>
                             <SheetClose asChild>
-                                <Button className="mt-4 rounded-none bg-[#0F766E] px-8 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#115E59]">
+                                <Button className="mt-4 rounded-none bg-[#7C3AED] px-8 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#EA580C]">
                                     Return to Shop
                                 </Button>
                             </SheetClose>
@@ -72,7 +72,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                                     </div>
                                     <div className="flex flex-1 flex-col justify-between">
                                         <div className="flex items-start justify-between gap-2">
-                                            <Link to={item.productSlug ? `/product/${item.productSlug}` : "/shop"} className="text-[13px] font-semibold text-zinc-800 hover:text-[#0F766E]">
+                                            <Link to={item.productSlug ? `/product/${item.productSlug}` : "/shop"} className="text-[13px] font-semibold text-zinc-800 hover:text-[#7C3AED]">
                                                 {item.name}
                                             </Link>
                                             <button onClick={() => removeItem(item.productId)} className="text-zinc-400 hover:text-red-600 transition-colors">
@@ -99,7 +99,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                                                     <Plus className="h-3 w-3" />
                                                 </button>
                                             </div>
-                                            <span className="text-[14px] font-extrabold text-[#0F766E]">
+                                            <span className="text-[14px] font-extrabold text-[#7C3AED]">
                                                 {formatCurrency(item.price * item.qty)}
                                             </span>
                                         </div>
@@ -124,7 +124,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                         )}
                         <div className="mb-4 flex items-center justify-between border-t border-zinc-200 pt-2">
                             <span className="text-sm font-bold uppercase tracking-widest text-zinc-900">Est. Total</span>
-                            <span className="text-lg font-bold text-[#0F766E]">{formatCurrency(subtotal + deliveryFee)}</span>
+                            <span className="text-lg font-bold text-[#7C3AED]">{formatCurrency(subtotal + deliveryFee)}</span>
                         </div>
                         <div className="grid gap-3">
                             <SheetClose asChild>
@@ -135,7 +135,7 @@ export function CartDrawer({ children }: { children: React.ReactNode }) {
                                 </Button>
                             </SheetClose>
                             <SheetClose asChild>
-                                <Button asChild className="w-full rounded-none bg-[#0F766E] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#115E59]">
+                                <Button asChild className="w-full rounded-none bg-[#7C3AED] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#EA580C]">
                                     <Link to="/checkout">
                                         Checkout
                                     </Link>

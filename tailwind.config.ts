@@ -63,7 +63,7 @@ const config: Config = {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				porto: {
-					maroon: '#0F766E',
+					maroon: '#7C3AED',
 					dark: '#222222',
 					gray: '#777777',
 					bg: '#F4F4F4'

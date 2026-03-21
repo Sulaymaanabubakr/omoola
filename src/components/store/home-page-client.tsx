@@ -102,13 +102,13 @@ export function HomePageClient({
             <h1 className="mt-4 font-sans text-5xl font-black uppercase tracking-tighter text-white drop-shadow-xl sm:text-6xl md:text-7xl lg:text-8xl">
               PREMIUM
               <br />
-              <span className="text-[#0F766E]">SELECTION</span>
+              <span className="text-[#7C3AED]">SELECTION</span>
             </h1>
             <p className="mx-auto mt-6 max-w-md font-serif text-lg text-zinc-200 drop-shadow-md sm:text-xl md:mx-0">
               Shop Quality, Live Beautiful. Fashion, beauty, foodstuff & essential groceries from Lagos.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4 md:justify-start">
-              <Button asChild className="h-12 rounded-none bg-[#0F766E] px-10 text-[13px] font-bold uppercase tracking-widest text-white shadow-lg hover:bg-[#115E59]">
+              <Button asChild className="h-12 rounded-none bg-[#7C3AED] px-10 text-[13px] font-bold uppercase tracking-widest text-white shadow-lg hover:bg-[#EA580C]">
                 <Link to="/shop?category=fashion-accessories">Shop Fashion</Link>
               </Button>
               <Button asChild variant="outline" className="h-12 rounded-none border-2 border-white bg-transparent px-10 text-[13px] font-bold uppercase tracking-widest text-white shadow-lg transition-colors hover:bg-white hover:text-zinc-900">
@@ -128,7 +128,7 @@ export function HomePageClient({
             <div key={cat.name} className="flex items-center">
               <Link
                 to={`/category/${cat.slug}`}
-                className="shrink-0 px-2 py-1 text-[11px] font-bold uppercase tracking-widest text-zinc-500 transition-colors hover:text-[#0F766E]"
+                className="shrink-0 px-2 py-1 text-[11px] font-bold uppercase tracking-widest text-zinc-500 transition-colors hover:text-[#7C3AED]"
               >
                 {cat.name}
               </Link>
@@ -170,13 +170,13 @@ export function HomePageClient({
 
           <Link to="/shop" className="group relative block overflow-hidden bg-[#F4F4F4] px-10 py-16 sm:py-24">
             <div className="relative z-10 text-center text-zinc-900">
-              <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#0F766E]">Top 10+</p>
+              <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#7C3AED]">Top 10+</p>
               <h3 className="font-serif text-3xl font-bold uppercase sm:text-4xl md:text-5xl">
-                UNDER <span className="text-[#0F766E]">₦5K</span>
+                UNDER <span className="text-[#7C3AED]">₦5K</span>
               </h3>
               <p className="mt-4 text-sm font-medium uppercase tracking-widest text-zinc-500">Selected Essentials</p>
               <div className="mt-8 flex justify-center">
-                <span className="inline-flex h-12 items-center justify-center border border-zinc-900 px-8 text-[11px] font-bold uppercase tracking-widest text-zinc-900 transition-colors group-hover:border-[#0F766E] group-hover:bg-[#0F766E] group-hover:text-white">
+                <span className="inline-flex h-12 items-center justify-center border border-zinc-900 px-8 text-[11px] font-bold uppercase tracking-widest text-zinc-900 transition-colors group-hover:border-[#7C3AED] group-hover:bg-[#7C3AED] group-hover:text-white">
                   SHOP NOW
                 </span>
               </div>
@@ -217,7 +217,7 @@ export function HomePageClient({
                 className="h-14 flex-1 rounded-none border-none bg-white px-6 text-[13px] focus-visible:ring-0 focus-visible:ring-offset-0"
                 required
               />
-              <Button type="submit" className="h-14 rounded-none bg-[#0F766E] px-8 text-[12px] font-black uppercase tracking-[0.1em] text-white hover:bg-[#115E59]">
+              <Button type="submit" className="h-14 rounded-none bg-[#7C3AED] px-8 text-[12px] font-black uppercase tracking-[0.1em] text-white hover:bg-[#EA580C]">
                 Submit
               </Button>
             </form>

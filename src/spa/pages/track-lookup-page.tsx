@@ -54,7 +54,7 @@ export function TrackLookupPage() {
           <div className="flex flex-col items-center justify-center gap-2">
             <h1 className="text-4xl font-black uppercase tracking-widest text-zinc-900">TRACK ORDER</h1>
             <div className="flex items-center text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              <Link to="/" className="hover:text-[#0F766E]">HOME</Link>
+              <Link to="/" className="hover:text-[#7C3AED]">HOME</Link>
               <ChevronRight className="mx-2 h-3 w-3" />
               <span className="text-zinc-900">TRACK ORDER</span>
             </div>
@@ -64,10 +64,10 @@ export function TrackLookupPage() {
 
       <div className="container mx-auto max-w-2xl px-4 py-12">
         <form onSubmit={onSubmit} className="space-y-4 border border-zinc-200 bg-white p-8">
-          <Input placeholder="Order ID or Order Number" value={orderId} onChange={(e) => setOrderId(e.target.value)} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" required />
-          <Input placeholder="Email (or use phone)" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" />
-          <Input placeholder="Phone (optional if email provided)" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#0F766E]" />
-          <Button className="h-12 w-full rounded-none bg-[#222222] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#0F766E]" disabled={loading}>{loading ? "Checking..." : "Track Order"}</Button>
+          <Input placeholder="Order ID or Order Number" value={orderId} onChange={(e) => setOrderId(e.target.value)} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" required />
+          <Input placeholder="Email (or use phone)" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" />
+          <Input placeholder="Phone (optional if email provided)" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-12 rounded-none border-zinc-300 text-[13px] focus-visible:ring-[#7C3AED]" />
+          <Button className="h-12 w-full rounded-none bg-[#222222] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#7C3AED]" disabled={loading}>{loading ? "Checking..." : "Track Order"}</Button>
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
         </form>
 
@@ -87,7 +87,7 @@ export function TrackLookupPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Total</p>
-                    <p className="text-[13px] font-bold text-[#0F766E]">{formatCurrency(result.order.total)}</p>
+                    <p className="text-[13px] font-bold text-[#7C3AED]">{formatCurrency(result.order.total)}</p>
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Status</p>

@@ -14,7 +14,7 @@ export function AboutPage() {
           <div className="flex flex-col items-center justify-center gap-2">
             <h1 className="text-4xl font-black uppercase tracking-widest text-zinc-900">ABOUT US</h1>
             <div className="flex items-center text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              <Link to="/" className="hover:text-[#0F766E]">HOME</Link>
+              <Link to="/" className="hover:text-[#7C3AED]">HOME</Link>
               <ChevronRight className="mx-2 h-3 w-3" />
               <span className="text-zinc-900">ABOUT US</span>
             </div>
@@ -28,7 +28,7 @@ export function AboutPage() {
           <h2 className="mb-8 font-serif text-3xl font-bold uppercase tracking-wide text-zinc-900 md:text-4xl">
             Providing Premium Quality at Accessible Prices
           </h2>
-          <div className="mx-auto mb-8 mt-4 h-[2px] w-[50px] bg-[#0F766E]" />
+          <div className="mx-auto mb-8 mt-4 h-[2px] w-[50px] bg-[#7C3AED]" />
           <p className="text-sm leading-relaxed text-zinc-600 md:text-base md:leading-loose">
             At {storeName}, we believe that premium quality products should not be out of reach. Located in
             the heart of Oshodi, Lagos, our mission is to deliver an exceptional shopping experience spanning Fashion,

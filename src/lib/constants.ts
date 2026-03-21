@@ -2,10 +2,10 @@ export const BUSINESS = {
   name: "Omoola Pharmacy & Stores",
   subtitle: "Omoola Pharmacy & Stores",
   landmark: "Omoola Pharmacy & Stores",
-  address: "21/22 Akinosho Street, Off Afariogun, Along Airport Road, Oshodi, Lagos, Nigeria",
-  phone: "07063006033",
+  address: "3, Ishaga Bus Stop, Opposite The Gem International School, Ilaro Road, Owode Yewa Ogun State.",
+  phone: "08117276772",
   email: "madonnaexpresslinkventure@gmail.com",
-  whatsapp: "2347063006033",
+  whatsapp: "2348117276772",
 };
 
 export const ORDER_STATUSES = [

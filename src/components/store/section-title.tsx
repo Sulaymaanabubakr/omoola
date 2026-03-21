@@ -22,7 +22,7 @@ export function SectionTitle({ title, subtitle, viewAllHref, align = "center" }:
                 {viewAllHref && align === "left" && (
                     <Link
                         to={viewAllHref}
-                        className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 transition-colors hover:text-[#0F766E]"
+                        className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 transition-colors hover:text-[#7C3AED]"
                     >
                         View All →
                     </Link>
@@ -30,12 +30,12 @@ export function SectionTitle({ title, subtitle, viewAllHref, align = "center" }:
             </div>
 
             {/* Brand signature short underline underneath the heading */}
-            <div className="mt-4 h-[2px] w-[50px] bg-[#0F766E]" />
+            <div className="mt-4 h-[2px] w-[50px] bg-[#7C3AED]" />
 
             {viewAllHref && align === "center" && (
                 <Link
                     to={viewAllHref}
-                    className="mt-4 text-[11px] font-bold uppercase tracking-widest text-[#0F766E] hover:underline"
+                    className="mt-4 text-[11px] font-bold uppercase tracking-widest text-[#7C3AED] hover:underline"
                 >
                     View All Products
                 </Link>

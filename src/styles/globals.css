@@ -10,20 +10,21 @@
     --card-foreground: 0 0% 13%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 13%;
-    /* Deep Teal: #0F766E -> HSL 175 77% 26% */
-    --primary: 175 77% 26%;
+    /* Purple: #7C3AED -> HSL 263 83% 58% */
+    --primary: 263 83% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 13%;
+    /* Soft orange surface */
+    --secondary: 28 100% 96%;
+    --secondary-foreground: 24 84% 20%;
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 47%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 13%;
+    --accent: 28 100% 94%;
+    --accent-foreground: 24 84% 20%;
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 175 77% 26%;
+    --ring: 263 83% 58%;
     /* Essential Porto style: sharp corners */
     --radius: 0px; 
   }
@@ -35,19 +36,19 @@
     --card-foreground: 0 0% 93%;
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 93%;
-    --primary: 175 77% 36%;
+    --primary: 263 83% 66%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 93%;
+    --secondary: 24 40% 18%;
+    --secondary-foreground: 30 100% 92%;
     --muted: 0 0% 14%;
     --muted-foreground: 0 0% 55%;
-    --accent: 0 0% 14%;
-    --accent-foreground: 0 0% 93%;
+    --accent: 24 40% 18%;
+    --accent-foreground: 30 100% 92%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 18%;
     --input: 0 0% 18%;
-    --ring: 175 77% 36%;
+    --ring: 263 83% 66%;
   }
 
   * {

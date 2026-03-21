@@ -76,7 +76,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     onClick={(e) => { e.preventDefault(); toggle(product.id); }}
                     className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:scale-110"
                 >
-                    <Heart className={`h-4 w-4 transition-colors ${wishlisted ? 'fill-[#0F766E] text-[#0F766E]' : 'text-zinc-400 hover:text-[#0F766E]'}`} />
+                    <Heart className={`h-4 w-4 transition-colors ${wishlisted ? 'fill-[#7C3AED] text-[#7C3AED]' : 'text-zinc-400 hover:text-[#7C3AED]'}`} />
                 </button>
 
                 {/* ── Hover Actions Overlay (Dark Add to Cart bar sliding up) ── */}
@@ -84,7 +84,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     <button
                         onClick={handleAdd}
                         disabled={product.stockQty < 1}
-                        className="flex w-full items-center justify-center gap-2 bg-[#222222] py-3.5 text-[11px] font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#0F766E] disabled:cursor-not-allowed disabled:bg-zinc-400"
+                        className="flex w-full items-center justify-center gap-2 bg-[#222222] py-3.5 text-[11px] font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#7C3AED] disabled:cursor-not-allowed disabled:bg-zinc-400"
                     >
                         {product.stockQty < 1 ? (
                             "Out of Stock"
@@ -108,7 +108,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 </p>
 
                 {/* Title */}
-                <Link to={`/product/${product.slug}`} className="mt-1 max-w-full truncate text-[13px] font-semibold text-zinc-800 transition-colors hover:text-[#0F766E]">
+                <Link to={`/product/${product.slug}`} className="mt-1 max-w-full truncate text-[13px] font-semibold text-zinc-800 transition-colors hover:text-[#7C3AED]">
                     {product.name}
                 </Link>
 
@@ -118,7 +118,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     {hasDiscount && (
                         <span className="text-sm text-zinc-400 line-through">{formatCurrency(product.compareAtPrice!)}</span>
                     )}
-                    <span className="text-[15px] font-extrabold text-[#0F766E]">
+                    <span className="text-[15px] font-extrabold text-[#7C3AED]">
                         {formatCurrency(product.price)}
                     </span>
                 </div>

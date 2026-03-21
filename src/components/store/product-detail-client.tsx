@@ -36,9 +36,9 @@ export function ProductDetailClient({ product }: { product: Product | null }) {
       <div className="border-b border-zinc-100 bg-white">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-            <Link to="/" className="hover:text-[#0F766E]">HOME</Link>
+            <Link to="/" className="hover:text-[#7C3AED]">HOME</Link>
             <ChevronRight className="mx-2 h-3 w-3" />
-            <Link to="/shop" className="hover:text-[#0F766E]">SHOP</Link>
+            <Link to="/shop" className="hover:text-[#7C3AED]">SHOP</Link>
             <ChevronRight className="mx-2 h-3 w-3" />
             <span className="text-zinc-900">{product.name}</span>
           </div>
@@ -85,7 +85,7 @@ export function ProductDetailClient({ product }: { product: Product | null }) {
             <div className="mt-6 flex flex-col gap-1 border-b border-zinc-200 pb-8">
               <div className="flex items-center gap-3">
                 {hasDiscount && <span className="text-xl text-zinc-400 line-through">{formatCurrency(product.compareAtPrice!)}</span>}
-                <span className="text-3xl font-black text-[#0F766E]">{formatCurrency(product.price)}</span>
+                <span className="text-3xl font-black text-[#7C3AED]">{formatCurrency(product.price)}</span>
               </div>
               <p className="mt-4 text-[13px] leading-relaxed text-zinc-600">
                 {product.description || "Premium quality product from Omoola Pharmacy & Stores, curated for excellence."}
@@ -94,7 +94,7 @@ export function ProductDetailClient({ product }: { product: Product | null }) {
 
             <div className="mt-6">
               <span className="text-[12px] font-bold uppercase tracking-wider text-zinc-900">Categories: </span>
-              <span className="cursor-pointer text-[13px] text-zinc-500 hover:text-[#0F766E]">{product.categoryName}, Premium</span>
+              <span className="cursor-pointer text-[13px] text-zinc-500 hover:text-[#7C3AED]">{product.categoryName}, Premium</span>
             </div>
 
             <div className="mt-8 flex items-center gap-4 border-b border-zinc-200 pb-8">
@@ -103,7 +103,7 @@ export function ProductDetailClient({ product }: { product: Product | null }) {
                 <span className="text-[13px] font-bold text-zinc-900">{qty}</span>
                 <button onClick={() => setQty((q) => Math.min(product.stockQty, q + 1))} className="px-2 text-zinc-500 hover:text-zinc-900">+</button>
               </div>
-              <Button onClick={handleAdd} disabled={product.stockQty < 1} className="h-12 flex-1 rounded-none bg-[#222222] px-8 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#0F766E]">
+              <Button onClick={handleAdd} disabled={product.stockQty < 1} className="h-12 flex-1 rounded-none bg-[#222222] px-8 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#7C3AED]">
                 {product.stockQty < 1 ? "Out of Stock" : "Add to Cart"}
               </Button>
               <button className="flex h-12 w-12 items-center justify-center border border-zinc-200 hover:bg-zinc-100">
@@ -114,7 +114,7 @@ export function ProductDetailClient({ product }: { product: Product | null }) {
             <div className="mt-8 flex items-center gap-4">
               <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-900">Share:</span>
               <div className="flex items-center gap-3">
-                <Share2 className="h-4 w-4 cursor-pointer text-zinc-600 hover:text-[#0F766E]" />
+                <Share2 className="h-4 w-4 cursor-pointer text-zinc-600 hover:text-[#7C3AED]" />
               </div>
             </div>
           </div>
@@ -125,9 +125,9 @@ export function ProductDetailClient({ product }: { product: Product | null }) {
         <div className="container mx-auto px-4">
           <Tabs defaultValue="description" className="w-full">
             <TabsList className="flex h-auto w-full justify-start rounded-none border-b border-zinc-200 bg-transparent p-0 pb-1">
-              <TabsTrigger value="description" className="rounded-none border-b-2 border-transparent px-6 py-4 text-xs font-bold uppercase tracking-widest text-zinc-500 data-[state=active]:border-[#0F766E] data-[state=active]:text-zinc-900 data-[state=active]:shadow-none">Description</TabsTrigger>
-              <TabsTrigger value="additional" className="rounded-none border-b-2 border-transparent px-6 py-4 text-xs font-bold uppercase tracking-widest text-zinc-500 data-[state=active]:border-[#0F766E] data-[state=active]:text-zinc-900 data-[state=active]:shadow-none">Additional Information</TabsTrigger>
-              <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent px-6 py-4 text-xs font-bold uppercase tracking-widest text-zinc-500 data-[state=active]:border-[#0F766E] data-[state=active]:text-zinc-900 data-[state=active]:shadow-none">Reviews (0)</TabsTrigger>
+              <TabsTrigger value="description" className="rounded-none border-b-2 border-transparent px-6 py-4 text-xs font-bold uppercase tracking-widest text-zinc-500 data-[state=active]:border-[#7C3AED] data-[state=active]:text-zinc-900 data-[state=active]:shadow-none">Description</TabsTrigger>
+              <TabsTrigger value="additional" className="rounded-none border-b-2 border-transparent px-6 py-4 text-xs font-bold uppercase tracking-widest text-zinc-500 data-[state=active]:border-[#7C3AED] data-[state=active]:text-zinc-900 data-[state=active]:shadow-none">Additional Information</TabsTrigger>
+              <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent px-6 py-4 text-xs font-bold uppercase tracking-widest text-zinc-500 data-[state=active]:border-[#7C3AED] data-[state=active]:text-zinc-900 data-[state=active]:shadow-none">Reviews (0)</TabsTrigger>
             </TabsList>
             <div className="bg-white p-8 shadow-sm">
               <TabsContent value="description" className="mt-0 text-[13px] leading-loose text-zinc-600">

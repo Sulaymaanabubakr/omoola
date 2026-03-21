@@ -63,7 +63,7 @@ export function Header() {
     return (
         <header className="sticky top-0 z-50 w-full transition-all">
             {/* Top utility bar */}
-            <div className="bg-[#0F766E] text-white">
+            <div className="bg-[#7C3AED] text-white">
                 <div className="container mx-auto flex h-10 items-center justify-center px-4 text-[11px] font-semibold tracking-wider md:justify-between">
                     <div className="flex w-full items-center justify-center md:w-auto md:justify-start">
                         <span className="uppercase text-white/90">
@@ -122,7 +122,7 @@ export function Header() {
                             <Button variant="ghost" size="icon" className="relative rounded-none hover:bg-zinc-100">
                                 <ShoppingBag className="h-5 w-5 text-zinc-800" />
                                 {count > 0 && (
-                                    <Badge className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#0F766E] px-1 text-[10px] font-bold leading-none text-white hover:bg-[#0F766E]">
+                                    <Badge className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#7C3AED] px-1 text-[10px] font-bold leading-none text-white hover:bg-[#7C3AED]">
                                         {count}
                                     </Badge>
                                 )}
@@ -136,7 +136,7 @@ export function Header() {
                             <Link
                                 key={item.name}
                                 to={item.href}
-                                className="text-[12px] font-bold uppercase tracking-[0.1em] text-zinc-800 transition-colors hover:text-[#0F766E]"
+                                className="text-[12px] font-bold uppercase tracking-[0.1em] text-zinc-800 transition-colors hover:text-[#7C3AED]"
                             >
                                 {item.name}
                             </Link>
@@ -185,7 +185,7 @@ export function Header() {
                             <Link to="/wishlist" aria-label="Wishlist">
                                 <Heart className="h-6 w-6 text-zinc-800" />
                                 {wishlistCount > 0 && (
-                                    <Badge className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#0F766E] px-1 text-[10px] font-bold leading-none text-white hover:bg-[#0F766E]">
+                                    <Badge className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#7C3AED] px-1 text-[10px] font-bold leading-none text-white hover:bg-[#7C3AED]">
                                         {wishlistCount}
                                     </Badge>
                                 )}
@@ -217,12 +217,12 @@ export function Header() {
                                 <Button variant="ghost" className="relative flex items-center justify-between gap-2 overflow-hidden rounded-none px-2 hover:bg-zinc-100">
                                     <div className="hidden flex-col items-end sm:flex md:hidden lg:flex">
                                         <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">Shopping Cart</span>
-                                        <span className="text-xs font-bold text-[#0F766E]">{formatCurrency(subtotal)}</span>
+                                        <span className="text-xs font-bold text-[#7C3AED]">{formatCurrency(subtotal)}</span>
                                     </div>
                                     <div className="relative">
                                         <ShoppingBag className="h-7 w-7 text-zinc-800" />
                                         {count > 0 && (
-                                            <Badge className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#0F766E] px-1 text-[10px] font-bold leading-none text-white hover:bg-[#0F766E]">
+                                            <Badge className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#7C3AED] px-1 text-[10px] font-bold leading-none text-white hover:bg-[#7C3AED]">
                                                 {count}
                                             </Badge>
                                         )}
@@ -255,7 +255,7 @@ export function Header() {
                                 className="w-52 rounded-xl border-zinc-200 p-2 shadow-2xl"
                             >
                                 {navItems.map((item) => (
-                                    <DropdownMenuItem key={item.name} asChild className="rounded-lg px-3 py-3 text-xs font-bold uppercase tracking-widest text-zinc-800 hover:bg-zinc-100 hover:text-[#0F766E]">
+                                    <DropdownMenuItem key={item.name} asChild className="rounded-lg px-3 py-3 text-xs font-bold uppercase tracking-widest text-zinc-800 hover:bg-zinc-100 hover:text-[#7C3AED]">
                                         <Link to={item.href}>{item.name}</Link>
                                     </DropdownMenuItem>
                                 ))}
@@ -272,10 +272,10 @@ export function Header() {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Search..."
-                                className="h-12 rounded-none border-zinc-300 text-sm focus-visible:ring-[#0F766E]"
+                                className="h-12 rounded-none border-zinc-300 text-sm focus-visible:ring-[#7C3AED]"
                                 autoFocus
                             />
-                            <Button type="submit" className="h-12 rounded-none bg-[#0F766E] px-8 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#115E59]">
+                            <Button type="submit" className="h-12 rounded-none bg-[#7C3AED] px-8 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#EA580C]">
                                 Search
                             </Button>
                         </form>

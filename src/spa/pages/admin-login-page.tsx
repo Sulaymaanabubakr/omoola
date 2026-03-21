@@ -39,7 +39,7 @@ export function AdminLoginPage() {
                     <Button
                         onClick={handleSignOut}
                         disabled={isSigningOut}
-                        className="mt-6 h-12 w-full rounded-none bg-[#0F766E] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#115E59]"
+                        className="mt-6 h-12 w-full rounded-none bg-[#7C3AED] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#EA580C]"
                     >
                         {isSigningOut ? "Signing out..." : "Sign Out & Login as Admin"}
                     </Button>
@@ -65,7 +65,7 @@ export function AdminLoginPage() {
             <div className="w-full max-w-sm">
                 <div className="mb-8 text-center">
                     <h1 className="text-2xl font-black uppercase tracking-[0.2em] text-white">Admin</h1>
-                    <div className="mx-auto mt-2 h-[2px] w-12 bg-[#0F766E]" />
+                    <div className="mx-auto mt-2 h-[2px] w-12 bg-[#7C3AED]" />
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-4 border border-zinc-700 bg-zinc-800 p-8">
@@ -75,7 +75,7 @@ export function AdminLoginPage() {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="h-12 rounded-none border-zinc-600 bg-zinc-900 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-[#0F766E]"
+                            className="h-12 rounded-none border-zinc-600 bg-zinc-900 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-[#7C3AED]"
                             placeholder="admin@example.com"
                             required
                         />
@@ -86,7 +86,7 @@ export function AdminLoginPage() {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="h-12 rounded-none border-zinc-600 bg-zinc-900 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-[#0F766E]"
+                            className="h-12 rounded-none border-zinc-600 bg-zinc-900 text-sm text-white placeholder:text-zinc-500 focus-visible:ring-[#7C3AED]"
                             placeholder="••••••••"
                             required
                         />
@@ -94,7 +94,7 @@ export function AdminLoginPage() {
                     <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="h-12 w-full rounded-none bg-[#0F766E] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#115E59]"
+                        className="h-12 w-full rounded-none bg-[#7C3AED] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#EA580C]"
                     >
                         {isSubmitting ? "Signing in..." : "Sign In"}
                     </Button>
