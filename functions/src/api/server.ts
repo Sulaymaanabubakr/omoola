@@ -110,25 +110,33 @@ function normalizeWhatsAppNumber(value: string) {
   return value.replace(/[^\d]/g, "");
 }
 
+function formatNaira(value: number) {
+  return `NGN ${value.toLocaleString()}`;
+}
+
 function buildWhatsAppUrl(order: Order, whatsappNumber: string) {
   const orderLines = order.items.map(
-    (item) => `- ${item.name} x${item.qty} (${item.price.toLocaleString()} each)`,
+    (item, index) => `${index + 1}. ${item.name}\n   Qty: ${item.qty}\n   Price: ${formatNaira(item.price)}`,
   );
   const text = [
-    `Hello, I'd like to place an order with ${order.customer.name}.`,
-    `Order Number: ${order.orderNumber}`,
+    "*NEW ORDER REQUEST*",
     "",
-    "Items:",
-    ...orderLines,
-    "",
-    `Subtotal: NGN ${order.subtotal.toLocaleString()}`,
-    `Delivery Fee: NGN ${order.deliveryFee.toLocaleString()}`,
-    `Total: NGN ${order.total.toLocaleString()}`,
-    "",
-    "Delivery Address:",
-    `${order.shippingAddress.addressLine1}, ${order.shippingAddress.city}, ${order.shippingAddress.state}`,
+    `Order No: ${order.orderNumber}`,
+    `Customer: ${order.customer.name}`,
     `Phone: ${order.shippingAddress.phone}`,
     `Email: ${order.customer.email}`,
+    "",
+    "*ITEMS*",
+    ...orderLines,
+    "",
+    "*ORDER SUMMARY*",
+    `Subtotal: ${formatNaira(order.subtotal)}`,
+    `Delivery Fee: ${formatNaira(order.deliveryFee)}`,
+    `Total: ${formatNaira(order.total)}`,
+    "",
+    "*DELIVERY ADDRESS*",
+    order.shippingAddress.addressLine1,
+    `${order.shippingAddress.city}, ${order.shippingAddress.state}`,
     order.shippingAddress.notes ? `Notes: ${order.shippingAddress.notes}` : "",
   ]
     .filter(Boolean)
