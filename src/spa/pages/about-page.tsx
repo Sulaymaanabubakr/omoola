@@ -31,7 +31,7 @@ export function AboutPage() {
           <div className="mx-auto mb-8 mt-4 h-[2px] w-[50px] bg-[#7C3AED]" />
           <p className="text-sm leading-relaxed text-zinc-600 md:text-base md:leading-loose">
             At {storeName}, we believe that premium quality products should not be out of reach. Located in
-            the heart of Oshodi, Lagos, our mission is to deliver an exceptional shopping experience spanning Fashion,
+            Owode Yewa, Ogun State, our mission is to deliver an exceptional shopping experience spanning Fashion,
             Beauty, and Groceries. Every item in our catalog is meticulously sourced and curated to ensure you get
             exactly what you desire, without compromise.
           </p>

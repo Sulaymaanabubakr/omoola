@@ -597,4 +597,28 @@ app.get("/api/admin/products", async (req, res) => {
   }
 });
 
+app.delete("/api/admin/products/:id", async (req, res) => {
+  try {
+    await requireAdmin(req);
+    const productId = String(req.params.id || "").trim();
+    if (!productId) {
+      res.status(400).json({ error: "Product id is required" });
+      return;
+    }
+
+    const docRef = getAdminDb().collection("products").doc(productId);
+    const snapshot = await docRef.get();
+    if (!snapshot.exists) {
+      res.status(404).json({ error: "Product not found" });
+      return;
+    }
+
+    await docRef.delete();
+    res.json({ success: true, id: productId });
+  } catch (error) {
+    const message = (error as Error).message || "Failed to delete product";
+    res.status(message === "Unauthorized" ? 403 : 500).json({ error: message });
+  }
+});
+
 export default app;

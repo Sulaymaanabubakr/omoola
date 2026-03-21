@@ -4,7 +4,7 @@ export const BUSINESS = {
   landmark: "Omoola Pharmacy & Stores",
   address: "3, Ishaga Bus Stop, Opposite The Gem International School, Ilaro Road, Owode Yewa Ogun State.",
   phone: "08117276772",
-  email: "madonnaexpresslinkventure@gmail.com",
+  email: "omoolasupermarket@gmail.com",
   whatsapp: "2348117276772",
 };
 

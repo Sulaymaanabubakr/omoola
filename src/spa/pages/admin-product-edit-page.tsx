@@ -152,12 +152,16 @@ export function AdminProductEditPage() {
                 updatedAt: new Date().toISOString()
             };
 
+            const sanitizedProductData = Object.fromEntries(
+                Object.entries(productData).filter(([, value]) => value !== undefined)
+            );
+
             if (isNew) {
-                productData.createdAt = new Date().toISOString();
+                sanitizedProductData.createdAt = new Date().toISOString();
                 const newDocRef = doc(collection(db, "products"));
-                await setDoc(newDocRef, { ...productData, id: newDocRef.id });
+                await setDoc(newDocRef, { ...sanitizedProductData, id: newDocRef.id });
             } else if (id) {
-                await updateDoc(doc(db, "products", id), productData);
+                await updateDoc(doc(db, "products", id), sanitizedProductData);
             }
 
             toast.success(`Product ${isNew ? 'created' : 'updated'} successfully`);

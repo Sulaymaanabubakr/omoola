@@ -97,7 +97,7 @@ export function HomePageClient({
             className="text-center md:text-left"
           >
             <h2 className="text-[12px] font-bold uppercase tracking-[0.3em] text-white drop-shadow-md">
-              Welcome to Oshodi's Finest
+              Welcome to Omoola Pharmacy & Stores
             </h2>
             <h1 className="mt-4 font-sans text-5xl font-black uppercase tracking-tighter text-white drop-shadow-xl sm:text-6xl md:text-7xl lg:text-8xl">
               PREMIUM
@@ -105,11 +105,11 @@ export function HomePageClient({
               <span className="text-[#7C3AED]">SELECTION</span>
             </h1>
             <p className="mx-auto mt-6 max-w-md font-serif text-lg text-zinc-200 drop-shadow-md sm:text-xl md:mx-0">
-              Shop Quality, Live Beautiful. Fashion, beauty, foodstuff & essential groceries from Lagos.
+              Shop quality, live beautifully. Fashion, beauty, foodstuff and everyday essentials from Owode Yewa, Ogun State.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4 md:justify-start">
               <Button asChild className="h-12 rounded-none bg-[#7C3AED] px-10 text-[13px] font-bold uppercase tracking-widest text-white shadow-lg hover:bg-[#EA580C]">
-                <Link to="/shop?category=fashion-accessories">Shop Fashion</Link>
+                <Link to="/shop?category=foodstuff-groceries">Shop Provisions</Link>
               </Button>
               <Button asChild variant="outline" className="h-12 rounded-none border-2 border-white bg-transparent px-10 text-[13px] font-bold uppercase tracking-widest text-white shadow-lg transition-colors hover:bg-white hover:text-zinc-900">
                 <Link to="/shop?category=foodstuff-groceries">Shop Foodstuff</Link>
