@@ -1,24 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  CreditCard,
-  DollarSign,
   Package,
-  ShoppingCart,
-  AlertCircle
+  Layers,
+  AlertCircle,
+  TrendingUp
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { fetchAdminDashboardStats } from "@/lib/firestore-admin";
-import type { Order, Product } from "@/types";
+import type { Product } from "@/types";
 
 export function AdminPage() {
   const [stats, setStats] = useState<{
-    totalOrders: number;
-    pendingOrders: number;
-    totalSales: number;
-    recentOrders: Order[];
     lowStockProducts: Product[];
     topSellingProducts: Product[];
   } | null>(null);
@@ -57,85 +52,36 @@ export function AdminPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
         <p className="text-muted-foreground mt-2">
-          Monitor your store's sales, orders, and inventory.
+          Monitor your store's products and inventory levels.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₦{stats?.totalSales.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+{stats?.totalOrders}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.pendingOrders}</div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <AlertCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.lowStockProducts?.length || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Requires immediate attention</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Top Selling Products</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.topSellingProducts?.length || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Products performing well</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <div className="space-y-4 min-w-[400px]">
-              {!stats?.recentOrders?.length ? (
-                <p className="text-sm text-muted-foreground">No recent orders.</p>
-              ) : (
-                stats?.recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        <Link to={`/admin/orders/${order.id}`} className="hover:underline">
-                          #{order.orderNumber || order.id.slice(-6)}
-                        </Link>
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {order.customer?.name || "Guest"}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Badge variant={order.status === "delivered" ? "default" : "secondary"}>
-                        {order.status}
-                      </Badge>
-                      <div className="font-medium">₦{order.total?.toLocaleString() || 0}</div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+        <Card>
           <CardHeader>
             <CardTitle>Low Stock Alerts</CardTitle>
           </CardHeader>
@@ -148,10 +94,43 @@ export function AdminPage() {
                   <div key={product.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
                     <div className="space-y-1 flex items-center gap-2">
                       <AlertCircle className="h-4 w-4 text-destructive" />
-                      <p className="text-sm font-medium leading-none max-w-[150px] truncate">{product.name}</p>
+                      <p className="text-sm font-medium leading-none max-w-[200px] truncate">
+                        <Link to={`/admin/products/edit/${product.id}`} className="hover:underline">
+                          {product.name}
+                        </Link>
+                      </p>
                     </div>
                     <div className="font-medium text-destructive">
                       {product.stockQty} left
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Best Sellers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {!stats?.topSellingProducts?.length ? (
+                <p className="text-sm text-muted-foreground">No best sellers marked yet.</p>
+              ) : (
+                stats?.topSellingProducts.map((product) => (
+                  <div key={product.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                    <div className="space-y-1 flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-[#7C3AED]" />
+                      <p className="text-sm font-medium leading-none max-w-[200px] truncate">
+                        <Link to={`/admin/products/edit/${product.id}`} className="hover:underline">
+                          {product.name}
+                        </Link>
+                      </p>
+                    </div>
+                    <div className="font-medium">
+                      ₦{product.price.toLocaleString()}
                     </div>
                   </div>
                 ))
