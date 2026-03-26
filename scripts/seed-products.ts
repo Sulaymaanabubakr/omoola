@@ -1,5 +1,16 @@
 import * as dotenv from "dotenv";
+import { createClient } from "@supabase/supabase-js";
 dotenv.config();
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error("Missing Supabase environment variables.");
+    process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 function generateSlug(name: string) {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -50,6 +61,7 @@ const templates = [
 async function fetchRealImages() {
     type DJResponse = { products: { category: string; thumbnail: string; images: string[] }[] };
     try {
+        // Use a different API or just fallback if dummyjson is down but here we use it
         const res = await fetch('https://dummyjson.com/products?limit=150');
         const data = (await res.json()) as DJResponse;
 
@@ -83,10 +95,7 @@ async function fetchRealImages() {
 }
 
 async function seed100() {
-    const { getAdminDb } = await import("../src/lib/firebase/admin");
-    const adminDb = getAdminDb();
-
-    console.log("Starting 100-product seed process for true project ID:", process.env.FIREBASE_PROJECT_ID);
+    console.log(`Starting 100-product seed process for Supabase...`);
 
     console.log("Fetching realistic images from dummyjson...");
     const realImages = await fetchRealImages();
@@ -95,76 +104,71 @@ async function seed100() {
         process.exit(1);
     }
 
-    // Quick fallback index trackers
     const trackers: Record<string, number> = { shoes: 0, clothing: 0, beauty: 0, jewelry: 0, food: 0 };
 
     const getImgFor = (catId: string, itemIdx: number) => {
         const pool = realImages[catId] || [];
         if (pool.length === 0) return `https://loremflickr.com/600/600/${catId}?lock=${itemIdx}`;
-        // Cycle sequentially through available real images
         const idx = (trackers[catId]++) % pool.length;
         return pool[idx];
     };
 
-    // First clean up previous products so the db isn't polluted
     console.log("Cleaning up old products...");
-    const oldSnaps = await adminDb.collection("products").get();
-    const deleteBatch = adminDb.batch();
-    oldSnaps.docs.forEach((doc: any) => deleteBatch.delete(doc.ref));
-    await deleteBatch.commit();
-    console.log("Old products cleared.");
+    const { error: deleteError } = await supabase.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (deleteError) {
+        console.error("Failed to delete old products:", deleteError);
+    } else {
+        console.log("Old products cleared.");
+    }
 
-    // Generate the new ones in chunks (Firestore limits batches to 500 ops)
-    let batch = adminDb.batch();
+    const rows = [];
     let count = 0;
 
     for (let i = 0; i < templates.length; i++) {
         const item = templates[i];
-        const docRef = adminDb.collection("products").doc();
         const sku = `SKU-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
         const slug = generateSlug(item.name) + "-" + Math.random().toString(36).substring(2, 6);
 
-        batch.set(docRef, {
-            id: docRef.id,
+        rows.push({
             name: item.name,
             slug: slug,
             description: `Premium quality ${item.name} sourced directly for Omoola Pharmacy & Stores. Authentic and top grade.`,
             price: item.price,
-            categoryId: item.categoryId,
-            categoryName: item.categoryName,
+            category_id: item.categoryId,
+            category_name: item.categoryName,
             tags: [item.categoryId, item.categoryName.toLowerCase().split(' ')[0]],
             featured: count < 10,
-            bestSeller: count >= 10 && count < 25,
-            newArrival: count >= 25 && count < 40,
+            best_seller: count >= 10 && count < 25,
+            new_arrival: count >= 25 && count < 40,
             images: [
                 {
                     url: getImgFor(item.categoryId, count),
-                    publicId: `dummy_${docRef.id}`, // the frontend expects this property
+                    publicId: `seed_${slug}`,
                     alt: item.name
                 }
             ],
-            stockQty: 50 + Math.floor(Math.random() * 100),
+            stock_qty: 50 + Math.floor(Math.random() * 100),
             sku: sku,
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
         });
 
         count++;
+    }
 
-        if (count % 50 === 0) {
-            await batch.commit();
-            console.log(`Committed ${count} products...`);
-            batch = adminDb.batch();
+    // Insert in chunks of 50
+    for (let i = 0; i < rows.length; i += 50) {
+        const chunk = rows.slice(i, i + 50);
+        const { error } = await supabase.from('products').insert(chunk);
+        if (error) {
+            console.error("Error inserting batch:", error);
+        } else {
+            console.log(`Inserted batch ${i / 50 + 1}`);
         }
     }
 
-    if (count % 50 !== 0) {
-        await batch.commit();
-        console.log(`Committed final batch, total: ${count}`);
-    }
-
-    console.log("Successfully seeded 100 distinct real items!");
+    console.log(`Successfully seeded ${count} distinct real items to Supabase!`);
     process.exit(0);
 }
 
