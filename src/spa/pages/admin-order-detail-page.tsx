@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Clock, MapPin, Package, User, CreditCard } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { useAuth } from "@/components/providers/auth-provider";
+import { fetchAdminOrderById, updateAdminOrderStatus } from "@/lib/firestore-admin";
 import type { Order, StatusEvent, OrderStatus } from "@/types";
 
 export function AdminOrderDetailPage() {
     const { id } = useParams<{ id: string }>();
-    const { getToken } = useAuth();
     const [order, setOrder] = useState<Order | null>(null);
     const [events, setEvents] = useState<StatusEvent[]>([]);
     const [loading, setLoading] = useState(true);
@@ -23,15 +22,13 @@ export function AdminOrderDetailPage() {
         if (!id) return;
         setLoading(true);
         try {
-            const token = await getToken();
-            if (!token) throw new Error("Unauthorized");
-            const res = await fetch(`/api/admin/orders/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to load order");
-            setOrder(data.order as Order);
-            setEvents((data.events || []) as StatusEvent[]);
+            const result = await fetchAdminOrderById(id);
+            if (result) {
+                setOrder(result.order);
+                setEvents(result.events);
+            } else {
+                toast.error("Order not found");
+            }
         } catch (err: any) {
             toast.error(err.message || "Order not found");
         }
@@ -47,22 +44,12 @@ export function AdminOrderDetailPage() {
         if (!id || !order) return;
         setUpdatingStatus(true);
         try {
-            const token = await getToken();
-            if (!token) throw new Error("Unauthorized");
-
-            const res = await fetch(`/api/admin/orders/${id}/status`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    status: newStatus,
-                    note: internalNote.trim() || `Order status updated to ${newStatus}`,
-                }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to update status");
+            const success = await updateAdminOrderStatus(
+                id,
+                newStatus,
+                internalNote.trim() || `Order status updated to ${newStatus}`,
+            );
+            if (!success) throw new Error("Failed to update status");
 
             setInternalNote("");
             toast.success("Order status updated");
@@ -97,7 +84,6 @@ export function AdminOrderDetailPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-[1fr_350px]">
-                {/* Left Column: Items and Fulfillment info */}
                 <div className="space-y-6">
                     <Card>
                         <CardHeader className="flex flex-row items-center gap-2">
@@ -152,7 +138,6 @@ export function AdminOrderDetailPage() {
                                     <span className="font-mono">{order.payment.reference}</span>
                                 </div>
                             )}
-
                             <div className="border-t pt-4 space-y-2 text-sm">
                                 <div className="flex justify-between text-muted-foreground">
                                     <span>Subtotal</span>
@@ -171,7 +156,6 @@ export function AdminOrderDetailPage() {
                     </Card>
                 </div>
 
-                {/* Right Column: Customer, Details & Admin Actions */}
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -257,7 +241,6 @@ export function AdminOrderDetailPage() {
                             </div>
                         </CardContent>
                     </Card>
-
                 </div>
             </div>
         </div>

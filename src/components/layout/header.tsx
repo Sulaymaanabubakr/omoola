@@ -1,13 +1,13 @@
 
 
+
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Menu, Search, ShoppingBag, User2, X, Heart } from "lucide-react";
+import { useState } from "react";
+import { Menu, Search, ShoppingBag, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { BUSINESS } from "@/lib/constants";
-import { useAuth } from "@/components/providers/auth-provider";
 import { useCart } from "@/components/providers/cart-provider";
 import { useWishlist } from "@/components/providers/wishlist-provider";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +31,6 @@ type PublicHeaderSettings = {
 };
 
 export function Header() {
-    const { user, profile, logout } = useAuth();
     const { count, subtotal } = useCart();
     const { count: wishlistCount } = useWishlist();
     const [query, setQuery] = useState("");
@@ -71,7 +70,6 @@ export function Header() {
                         </span>
                     </div>
                     <div className="hidden items-center gap-6 uppercase md:flex">
-                        <Link to="/track" className="hover:text-white/80 transition-colors">Track Order</Link>
                         <Link to="/about" className="hover:text-white/80 transition-colors">About</Link>
                         <Link to="/contact" className="hover:text-white/80 transition-colors">Contact</Link>
                     </div>
@@ -96,28 +94,8 @@ export function Header() {
             {/* ── Main White Header ── */}
             <div className="border-b bg-white shadow-sm">
                 <div className="container relative mx-auto flex h-[64px] items-center justify-between overflow-hidden px-4 sm:h-[72px] lg:h-[80px]">
-                    {/* Mobile Left: Account + Cart */}
+                    {/* Mobile Left: Cart */}
                     <div className="absolute left-4 flex items-center gap-1 md:hidden">
-                        {user ? (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="rounded-none hover:bg-zinc-100">
-                                        <User2 className="h-5 w-5 text-zinc-800" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="rounded-none border-zinc-200 shadow-xl">
-                                    <DropdownMenuItem asChild className="cursor-pointer text-xs font-semibold uppercase hover:bg-zinc-100"><Link to="/account">My Account</Link></DropdownMenuItem>
-                                    <DropdownMenuItem className="cursor-pointer text-xs font-semibold uppercase hover:bg-zinc-100" onClick={() => logout()}>Logout</DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        ) : (
-                            <Button asChild variant="ghost" size="icon" className="rounded-none hover:bg-zinc-100">
-                                <Link to="/account" aria-label="Go to sign in">
-                                    <User2 className="h-5 w-5 text-zinc-800" />
-                                </Link>
-                            </Button>
-                        )}
-
                         <CartDrawer>
                             <Button variant="ghost" size="icon" className="relative rounded-none hover:bg-zinc-100">
                                 <ShoppingBag className="h-5 w-5 text-zinc-800" />
@@ -191,26 +169,6 @@ export function Header() {
                                 )}
                             </Link>
                         </Button>
-
-                        {user ? (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="rounded-none hover:bg-zinc-100">
-                                        <User2 className="h-6 w-6 text-zinc-800" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="rounded-none border-zinc-200 shadow-xl">
-                                    <DropdownMenuItem asChild className="cursor-pointer text-xs font-semibold uppercase hover:bg-zinc-100"><Link to="/account">My Account</Link></DropdownMenuItem>
-                                    <DropdownMenuItem className="cursor-pointer text-xs font-semibold uppercase hover:bg-zinc-100" onClick={() => logout()}>Logout</DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        ) : (
-                            <Button asChild variant="ghost" size="icon" className="rounded-none hover:bg-zinc-100">
-                                <Link to="/account" aria-label="Go to sign in">
-                                    <User2 className="h-6 w-6 text-zinc-800" />
-                                </Link>
-                            </Button>
-                        )}
 
                         <div className="ml-2 border-l border-zinc-200 py-2 pl-4">
                             <CartDrawer>

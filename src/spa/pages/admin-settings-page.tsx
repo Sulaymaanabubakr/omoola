@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useAuth } from "@/components/providers/auth-provider";
+import { fetchAdminSettings, saveAdminSettings, uploadImageToCloudinary } from "@/lib/firestore-admin";
 import type { StoreSettings } from "@/types";
 
 type SettingsFormState = Omit<StoreSettings, "deliveryFee" | "announcementSpeed"> & {
@@ -36,7 +36,6 @@ const defaultSettings: SettingsFormState = {
 };
 
 export function AdminSettingsPage() {
-  const { getToken } = useAuth();
   const [settings, setSettings] = useState<SettingsFormState>(defaultSettings);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -46,14 +45,7 @@ export function AdminSettingsPage() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const token = await getToken();
-        if (!token) return;
-        const res = await fetch("/api/admin/settings", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error("Failed to load settings");
-        const data = await res.json();
-        const item = data.item || defaultSettings;
+        const item = await fetchAdminSettings();
         setSettings({
           ...item,
           deliveryFee: item.deliveryFee ?? 0,
@@ -66,29 +58,18 @@ export function AdminSettingsPage() {
       }
     };
     loadSettings();
-  }, [getToken]);
+  }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const token = await getToken();
-      if (!token) throw new Error("Unauthorized");
-
-      const res = await fetch("/api/admin/settings", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...settings,
-          deliveryFee: settings.deliveryFee === "" ? 0 : settings.deliveryFee,
-          announcementSpeed: settings.announcementSpeed === "" ? 20 : settings.announcementSpeed,
-        }),
+      const success = await saveAdminSettings({
+        ...settings,
+        deliveryFee: settings.deliveryFee === "" ? 0 : settings.deliveryFee,
+        announcementSpeed: settings.announcementSpeed === "" ? 20 : settings.announcementSpeed,
       });
-
-      if (!res.ok) throw new Error("Failed to save settings");
+      if (!success) throw new Error("Failed to save settings");
       toast.success("Store settings updated successfully.");
     } catch (err: any) {
       toast.error(err.message);
@@ -100,97 +81,39 @@ export function AdminSettingsPage() {
   const handleHeroUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const token = await getToken();
-    if (!token) {
-      toast.error("Unauthorized");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
     setUploadingHero(true);
-
-    reader.onload = async () => {
-      try {
-        const image = reader.result as string;
-        const res = await fetch("/api/admin/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ image }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to upload hero image");
-
-        setSettings((prev) => ({
-          ...prev,
-          heroImages: [...prev.heroImages, String(data.url || "")].filter(Boolean),
-        }));
-        toast.success("Hero image uploaded.");
-      } catch (err: any) {
-        toast.error(err.message || "Failed to upload hero image");
-      } finally {
-        setUploadingHero(false);
-        e.target.value = "";
-      }
-    };
-
-    reader.onerror = () => {
+    try {
+      const { url } = await uploadImageToCloudinary(file);
+      setSettings((prev) => ({
+        ...prev,
+        heroImages: [...prev.heroImages, url].filter(Boolean),
+      }));
+      toast.success("Hero image uploaded.");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload hero image");
+    } finally {
       setUploadingHero(false);
       e.target.value = "";
-      toast.error("Could not read image file");
-    };
+    }
   };
 
   const handleLogoUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const token = await getToken();
-    if (!token) {
-      toast.error("Unauthorized");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
     setUploadingLogo(true);
-
-    reader.onload = async () => {
-      try {
-        const image = reader.result as string;
-        const res = await fetch("/api/admin/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ image }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to upload logo");
-
-        setSettings((prev) => ({
-          ...prev,
-          logoUrl: String(data.url || ""),
-        }));
-        toast.success("Logo uploaded.");
-      } catch (err: any) {
-        toast.error(err.message || "Failed to upload logo");
-      } finally {
-        setUploadingLogo(false);
-        e.target.value = "";
-      }
-    };
-
-    reader.onerror = () => {
+    try {
+      const { url } = await uploadImageToCloudinary(file);
+      setSettings((prev) => ({
+        ...prev,
+        logoUrl: url,
+      }));
+      toast.success("Logo uploaded.");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload logo");
+    } finally {
       setUploadingLogo(false);
       e.target.value = "";
-      toast.error("Could not read logo file");
-    };
+    }
   };
 
   const removeHeroImage = (index: number) => {
@@ -216,7 +139,6 @@ export function AdminSettingsPage() {
       </div>
 
       <div className="grid gap-6">
-        {/* General Details */}
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -304,7 +226,6 @@ export function AdminSettingsPage() {
         </Card>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Contact & Social */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -332,7 +253,6 @@ export function AdminSettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Shipping */}
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -401,7 +321,6 @@ export function AdminSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Announcement Bar */}
         <Card>
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">

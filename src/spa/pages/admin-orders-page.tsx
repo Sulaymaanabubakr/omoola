@@ -7,27 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useAuth } from "@/components/providers/auth-provider";
+import { fetchAdminOrders, updateAdminOrderStatus } from "@/lib/firestore-admin";
 import type { Order, OrderStatus } from "@/types";
 
 export function AdminOrdersPage() {
-    const { getToken } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const fetchOrders = async () => {
+    const loadOrders = async () => {
         setLoading(true);
         try {
-            const token = await getToken();
-            if (!token) throw new Error("Unauthorized");
-
-            const res = await fetch("/api/admin/orders", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to load orders");
-            setOrders((data.items || []) as Order[]);
+            const items = await fetchAdminOrders();
+            setOrders(items);
         } catch (err: any) {
             toast.error("Failed to load orders: " + err.message);
         } finally {
@@ -36,27 +28,13 @@ export function AdminOrdersPage() {
     };
 
     useEffect(() => {
-        fetchOrders();
+        loadOrders();
     }, []);
 
-    const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
+    const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
         try {
-            const token = await getToken();
-            if (!token) throw new Error("Unauthorized");
-
-            const res = await fetch(`/api/admin/orders/${orderId}/status`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    status: newStatus,
-                    note: `Order status updated to ${newStatus} by admin`,
-                }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to update order status");
+            const success = await updateAdminOrderStatus(orderId, newStatus);
+            if (!success) throw new Error("Failed to update order status");
 
             setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
             toast.success("Order status updated!");
@@ -146,7 +124,7 @@ export function AdminOrdersPage() {
                                             <td className="p-4">
                                                 <Select
                                                     value={order.status}
-                                                    onValueChange={(val: any) => updateOrderStatus(order.id, val)}
+                                                    onValueChange={(val: any) => handleUpdateStatus(order.id, val)}
                                                 >
                                                     <SelectTrigger className="w-[130px] h-8 text-xs">
                                                         <SelectValue placeholder="Status" />

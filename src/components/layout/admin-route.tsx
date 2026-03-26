@@ -1,9 +1,8 @@
-import { useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/providers/auth-provider";
 
 export function AdminRoute() {
-    const { user, profile, loading } = useAuth();
+    const { user, loading } = useAuth();
     const location = useLocation();
 
     if (loading) {
@@ -18,12 +17,6 @@ export function AdminRoute() {
     }
 
     if (!user) {
-        return <Navigate to="/admin/login" state={{ from: location }} replace />;
-    }
-
-    // If user is logged in but has no admin role, send them to the admin login page
-    // so they can sign out and re-login with an admin account.
-    if (profile?.role !== "admin") {
         return <Navigate to="/admin/login" state={{ from: location }} replace />;
     }
 

@@ -1,13 +1,11 @@
 /**
- * Client-side Firestore service.
- * All public data reads and user-owned reads/writes go here —
- * no API server round-trip required.
+ * Client-side Supabase data service.
+ * All public data reads go here — no API server round-trip required.
  */
 
-import { getDbClient } from "@/lib/firebase/client";
-import { serializeProduct } from "@/lib/product-serialization";
-import { serializeStoreSettings, defaultStoreSettings } from "@/lib/settings-serialization";
-import type { Order, Product, StatusEvent, StoreSettings, UserProfile } from "@/types";
+import { supabase } from "@/lib/supabase";
+import { defaultStoreSettings, serializeStoreSettings } from "@/lib/settings-serialization";
+import type { Order, Product, StatusEvent, StoreSettings } from "@/types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -33,50 +31,44 @@ export interface ProductsResult {
 // ─── Products ────────────────────────────────────────────────────────────────
 
 export async function fetchProducts(filters: ProductFilters = {}): Promise<ProductsResult> {
-    const db = await getDbClient();
-    if (!db) return { items: [], pagination: { page: 1, pageSize: 12, total: 0, totalPages: 1 } };
-
-    const { collection, getDocs, query, where } = await import("firebase/firestore");
-
-    // The seed script uses boolean `true`, not string `"true"`.
-    const q_fs = query(collection(db, "products"), where("isActive", "==", true));
-    const snapshot = await getDocs(q_fs);
-
-    let products = snapshot.docs.map((doc) =>
-        serializeProduct(doc.id, doc.data() as Record<string, unknown>),
-    );
-
     const { q = "", category = "", slug = "", sort = "new", page = 1, pageSize = 12 } = filters;
 
-    if (slug) products = products.filter((p) => p.slug === slug);
+    let query = supabase.from("products").select("*").eq("is_active", true);
 
-    if (q) {
-        const lower = q.toLowerCase();
-        products = products.filter((p) =>
-            `${p.name ?? ""} ${p.description ?? ""} ${p.tags?.join(" ") ?? ""}`.toLowerCase().includes(lower),
-        );
-    }
-
+    if (slug) query = query.eq("slug", slug);
     if (category && category !== "all") {
-        products = products.filter(
-            (p) => p.categoryId === category || p.categoryName === category || p.slug === category,
-        );
+        query = query.or(`category_id.eq.${category},category_name.eq.${category}`);
+    }
+    if (q) {
+        query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
     }
 
-    products = products.sort((a, b) => {
-        if (sort === "price-asc") return Number(a.price) - Number(b.price);
-        if (sort === "price-desc") return Number(b.price) - Number(a.price);
-        if (sort === "best") return Number(Boolean(b.bestSeller)) - Number(Boolean(a.bestSeller));
-        return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
-    });
+    // Sorting
+    if (sort === "price-asc") query = query.order("price", { ascending: true });
+    else if (sort === "price-desc") query = query.order("price", { ascending: false });
+    else query = query.order("created_at", { ascending: false });
+
+    const { data, error, count } = await query;
+    if (error) {
+        console.error("Error fetching products:", error);
+        return { items: [], pagination: { page: 1, pageSize: 12, total: 0, totalPages: 1 } };
+    }
+
+    const products = (data || []).map(mapDbProduct);
+
+    // Client-side best seller sort if needed
+    let sorted = products;
+    if (sort === "best") {
+        sorted = [...products].sort((a, b) => Number(Boolean(b.bestSeller)) - Number(Boolean(a.bestSeller)));
+    }
 
     const safePage = Number.isFinite(page) && page > 0 ? page : 1;
     const safePageSize = Number.isFinite(pageSize) && pageSize > 0 ? pageSize : 12;
-    const total = products.length;
+    const total = sorted.length;
     const start = (safePage - 1) * safePageSize;
 
     return {
-        items: products.slice(start, start + safePageSize),
+        items: sorted.slice(start, start + safePageSize),
         pagination: {
             page: safePage,
             pageSize: safePageSize,
@@ -89,105 +81,31 @@ export async function fetchProducts(filters: ProductFilters = {}): Promise<Produ
 // ─── Settings ────────────────────────────────────────────────────────────────
 
 export async function fetchPublicSettings(): Promise<StoreSettings> {
-    const db = await getDbClient();
-    if (!db) return defaultStoreSettings;
-
     try {
-        const { doc, getDoc } = await import("firebase/firestore");
-        const snap = await getDoc(doc(db, "settings", "store"));
-        return snap.exists()
-            ? serializeStoreSettings(snap.data() as Record<string, unknown>)
-            : defaultStoreSettings;
+        const { data, error } = await supabase
+            .from("settings")
+            .select("*")
+            .eq("id", "store")
+            .single();
+
+        if (error || !data) return defaultStoreSettings;
+
+        return serializeStoreSettings({
+            storeName: data.store_name,
+            logoUrl: data.logo_url,
+            storeAddress: data.store_address,
+            phone: data.phone,
+            email: data.email,
+            whatsapp: data.whatsapp,
+            heroImages: data.hero_images,
+            deliveryFee: data.delivery_fee,
+            announcementEnabled: data.announcement_enabled,
+            announcementText: data.announcement_text,
+            announcementSpeed: data.announcement_speed,
+            updatedAt: data.updated_at,
+        });
     } catch {
         return defaultStoreSettings;
-    }
-}
-
-// ─── User Profile ─────────────────────────────────────────────────────────────
-
-export async function fetchUserProfile(uid: string): Promise<UserProfile | null> {
-    const db = await getDbClient();
-    if (!db) return null;
-
-    try {
-        const { doc, getDoc } = await import("firebase/firestore");
-        const snap = await getDoc(doc(db, "users", uid));
-        if (!snap.exists()) return null;
-        return snap.data() as UserProfile;
-    } catch {
-        return null;
-    }
-}
-
-export async function saveUserProfile(
-    uid: string,
-    data: { name: string; email: string; role?: string; createdAt?: string },
-): Promise<void> {
-    const db = await getDbClient();
-    if (!db) return;
-
-    const { doc, setDoc, getDoc, serverTimestamp } = await import("firebase/firestore");
-    const ref = doc(db, "users", uid);
-    const existing = await getDoc(ref);
-    const existingData = existing.data() as Record<string, unknown> | undefined;
-
-    await setDoc(
-        ref,
-        {
-            uid,
-            name: data.name,
-            email: data.email,
-            role: existingData?.role ?? data.role ?? "customer",
-            createdAt: existingData?.createdAt ?? data.createdAt ?? new Date().toISOString(),
-            updatedAt: serverTimestamp(),
-        },
-        { merge: true },
-    );
-}
-
-// ─── Orders (read) ────────────────────────────────────────────────────────────
-
-export async function fetchMyOrders(uid: string): Promise<Order[]> {
-    const db = await getDbClient();
-    if (!db) return [];
-
-    try {
-        const { collection, getDocs, query, where, orderBy } = await import("firebase/firestore");
-        const q_fs = query(
-            collection(db, "orders"),
-            where("userId", "==", uid),
-            orderBy("createdAt", "desc"),
-        );
-        const snapshot = await getDocs(q_fs);
-        return snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) } as Order));
-    } catch {
-        return [];
-    }
-}
-
-export async function fetchOrderById(
-    orderId: string,
-): Promise<{ order: Order; events: StatusEvent[] } | null> {
-    const db = await getDbClient();
-    if (!db) return null;
-
-    try {
-        const { collection, doc, getDoc, getDocs, orderBy, query } = await import("firebase/firestore");
-        const orderSnap = await getDoc(doc(db, "orders", orderId));
-        if (!orderSnap.exists()) return null;
-
-        const order = { id: orderSnap.id, ...(orderSnap.data() as Record<string, unknown>) } as Order;
-
-        const eventsSnap = await getDocs(
-            query(collection(db, "orders", orderId, "statusEvents"), orderBy("createdAt", "asc")),
-        );
-        const events = eventsSnap.docs.map(
-            (e) => ({ id: e.id, ...(e.data() as Record<string, unknown>) } as unknown as StatusEvent),
-        );
-
-        return { order, events };
-    } catch {
-        return null;
     }
 }
 
@@ -199,24 +117,67 @@ export async function submitContactForm(data: {
     subject?: string;
     message: string;
 }): Promise<void> {
-    const db = await getDbClient();
-    if (!db) throw new Error("Firebase not configured");
-
-    const { collection, addDoc } = await import("firebase/firestore");
-    await addDoc(collection(db, "contactMessages"), {
-        ...data,
-        createdAt: new Date().toISOString(),
+    const { error } = await supabase.from("contact_messages").insert({
+        name: data.name,
+        email: data.email,
+        subject: data.subject || null,
+        message: data.message,
+        created_at: new Date().toISOString(),
     });
+    if (error) throw new Error("Failed to submit contact form");
 }
 
 export async function subscribeNewsletter(email: string): Promise<void> {
-    const db = await getDbClient();
-    if (!db) throw new Error("Firebase not configured");
-
-    const { doc, setDoc } = await import("firebase/firestore");
-    await setDoc(
-        doc(db, "newsletterSubscribers", email),
-        { email, updatedAt: new Date().toISOString() },
-        { merge: true },
+    const { error } = await supabase.from("newsletter_subscribers").upsert(
+        { email, updated_at: new Date().toISOString() },
+        { onConflict: "email" },
     );
+    if (error) throw new Error("Failed to subscribe");
+}
+
+// ─── DB → App Mapping Helpers ────────────────────────────────────────────────
+
+/** Map a Supabase DB product row (snake_case) to an app Product (camelCase) */
+export function mapDbProduct(row: Record<string, any>): Product {
+    return {
+        id: row.id,
+        name: row.name || "",
+        slug: row.slug || "",
+        description: row.description || "",
+        price: Number(row.price) || 0,
+        compareAtPrice: row.compare_at_price != null ? Number(row.compare_at_price) : undefined,
+        categoryId: row.category_id || "",
+        categoryName: row.category_name || "",
+        tags: Array.isArray(row.tags) ? row.tags : [],
+        featured: Boolean(row.featured),
+        bestSeller: Boolean(row.best_seller),
+        newArrival: Boolean(row.new_arrival),
+        images: Array.isArray(row.images) ? row.images : [],
+        stockQty: Math.max(0, Math.floor(Number(row.stock_qty) || 0)),
+        sku: row.sku || "",
+        isActive: Boolean(row.is_active),
+        createdAt: row.created_at || "",
+        updatedAt: row.updated_at || "",
+    };
+}
+
+/** Map an app Product (camelCase) to a Supabase DB row (snake_case) */
+export function mapProductToDb(product: Partial<Product>): Record<string, any> {
+    const row: Record<string, any> = {};
+    if (product.name !== undefined) row.name = product.name;
+    if (product.slug !== undefined) row.slug = product.slug;
+    if (product.description !== undefined) row.description = product.description;
+    if (product.price !== undefined) row.price = product.price;
+    if (product.compareAtPrice !== undefined) row.compare_at_price = product.compareAtPrice;
+    if (product.categoryId !== undefined) row.category_id = product.categoryId;
+    if (product.categoryName !== undefined) row.category_name = product.categoryName;
+    if (product.tags !== undefined) row.tags = product.tags;
+    if (product.featured !== undefined) row.featured = product.featured;
+    if (product.bestSeller !== undefined) row.best_seller = product.bestSeller;
+    if (product.newArrival !== undefined) row.new_arrival = product.newArrival;
+    if (product.images !== undefined) row.images = product.images;
+    if (product.stockQty !== undefined) row.stock_qty = product.stockQty;
+    if (product.sku !== undefined) row.sku = product.sku;
+    if (product.isActive !== undefined) row.is_active = product.isActive;
+    return row;
 }

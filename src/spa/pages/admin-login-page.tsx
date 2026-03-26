@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function AdminLoginPage() {
-    const { user, profile, loading, login, logout } = useAuth();
+    const { user, loading, login, logout } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,39 +14,8 @@ export function AdminLoginPage() {
 
     if (loading) return <div className="flex min-h-screen items-center justify-center bg-zinc-900 text-white">Loading...</div>;
 
-    // Already logged in as admin → go to dashboard
-    if (user && profile?.role === "admin") return <Navigate to="/admin" replace />;
-
-    // Logged in but NOT admin → show access denied with option to sign out
-    if (user && profile?.role !== "admin") {
-        const handleSignOut = async () => {
-            setIsSigningOut(true);
-            try {
-                await logout();
-            } catch {
-                setIsSigningOut(false);
-            }
-        };
-
-        return (
-            <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-900 px-4">
-                <div className="w-full max-w-sm border border-zinc-700 bg-zinc-800 p-8 text-center">
-                    <h1 className="text-xl font-black uppercase tracking-widest text-white">Access Denied</h1>
-                    <p className="mt-2 text-sm text-zinc-400">
-                        You are currently signed in as <strong className="text-zinc-300">{profile?.email || user.email}</strong>.
-                        This account does not have admin privileges.
-                    </p>
-                    <Button
-                        onClick={handleSignOut}
-                        disabled={isSigningOut}
-                        className="mt-6 h-12 w-full rounded-none bg-[#7C3AED] text-xs font-bold uppercase tracking-widest text-white hover:bg-[#EA580C]"
-                    >
-                        {isSigningOut ? "Signing out..." : "Sign Out & Login as Admin"}
-                    </Button>
-                </div>
-            </div>
-        );
-    }
+    // Already logged in → go to dashboard
+    if (user) return <Navigate to="/admin" replace />;
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

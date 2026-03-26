@@ -7,12 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { useAuth } from "@/components/providers/auth-provider";
-import { toggleProductStatus } from "@/lib/firestore-admin";
+import { fetchAdminProducts, toggleProductStatus, deleteAdminProduct } from "@/lib/firestore-admin";
 import type { Product } from "@/types";
 
 export function AdminProductsPage() {
-    const { getToken } = useAuth();
     const navigate = useNavigate();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -22,14 +20,8 @@ export function AdminProductsPage() {
     const loadProducts = async () => {
         setLoading(true);
         try {
-            const token = await getToken();
-            if (!token) throw new Error("Unauthorized");
-            const res = await fetch("/api/admin/products", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to load products");
-            setProducts((data.items || []) as Product[]);
+            const items = await fetchAdminProducts();
+            setProducts(items);
         } catch (err: any) {
             toast.error(err.message || "Failed to load products");
         } finally {
@@ -57,15 +49,8 @@ export function AdminProductsPage() {
 
         setDeletingId(product.id);
         try {
-            const token = await getToken();
-            if (!token) throw new Error("Unauthorized");
-
-            const res = await fetch(`/api/admin/products/${product.id}`, {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to delete product");
+            const success = await deleteAdminProduct(product.id);
+            if (!success) throw new Error("Failed to delete product");
 
             setProducts((current) => current.filter((item) => item.id !== product.id));
             toast.success("Product deleted successfully.");

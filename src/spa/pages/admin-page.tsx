@@ -10,11 +10,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useAuth } from "@/components/providers/auth-provider";
+import { fetchAdminDashboardStats } from "@/lib/firestore-admin";
 import type { Order, Product } from "@/types";
 
 export function AdminPage() {
-  const { getToken } = useAuth();
   const [stats, setStats] = useState<{
     totalOrders: number;
     pendingOrders: number;
@@ -29,16 +28,8 @@ export function AdminPage() {
     let mounted = true;
     async function loadStats() {
       try {
-        const token = await getToken();
-        if (!token) throw new Error("Unauthorized");
-
-        const res = await fetch("/api/admin/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to load dashboard");
-
-        if (mounted) {
+        const data = await fetchAdminDashboardStats();
+        if (mounted && data) {
           setStats(data);
         }
       } catch (err: any) {
@@ -51,7 +42,7 @@ export function AdminPage() {
     }
     loadStats();
     return () => { mounted = false; };
-  }, [getToken]);
+  }, []);
 
   if (loading) {
     return (

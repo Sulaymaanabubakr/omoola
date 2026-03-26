@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
 import { Search, AlertTriangle, Save, Loader2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useAuth } from "@/components/providers/auth-provider";
-import { getDbClient } from "@/lib/firebase/client";
-import { doc, updateDoc } from "firebase/firestore";
+import { fetchAdminProducts, updateProductStock } from "@/lib/firestore-admin";
 import type { Product } from "@/types";
 
 export function AdminInventoryPage() {
-    const { getToken } = useAuth();
     const [products, setProducts] = useState<Product[]>([]);
     const [stockDrafts, setStockDrafts] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
@@ -21,14 +18,7 @@ export function AdminInventoryPage() {
     const loadInventory = async () => {
         setLoading(true);
         try {
-            const token = await getToken();
-            if (!token) throw new Error("Unauthorized");
-            const res = await fetch("/api/admin/products", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to load inventory");
-            const items = (data.items || []) as Product[];
+            const items = await fetchAdminProducts();
             setProducts(items);
             setStockDrafts(
                 Object.fromEntries(items.map((product) => [product.id, String(product.stockQty ?? 0)])),
@@ -52,16 +42,14 @@ export function AdminInventoryPage() {
     const saveStock = async (product: Product) => {
         setSavingId(product.id);
         try {
-            const db = await getDbClient();
-            if (!db) return;
             const rawValue = stockDrafts[product.id] ?? String(product.stockQty ?? 0);
             if (rawValue === "") throw new Error("Stock quantity is required");
             const stockQty = Number(rawValue);
             if (!Number.isFinite(stockQty) || stockQty < 0) throw new Error("Stock quantity must be 0 or more");
-            await updateDoc(doc(db, "products", product.id), {
-                stockQty,
-                updatedAt: new Date().toISOString()
-            });
+
+            const success = await updateProductStock(product.id, stockQty);
+            if (!success) throw new Error("Failed to update stock");
+
             setProducts(products.map((p) => p.id === product.id ? { ...p, stockQty } : p));
             setStockDrafts((prev) => ({ ...prev, [product.id]: String(stockQty) }));
             toast.success(`Stock level for "${product.name}" updated successfully.`);
@@ -146,7 +134,7 @@ export function AdminInventoryPage() {
                                                         </div>
                                                         <div className="font-medium">
                                                             {product.name}
-                                                            {isOutOfStock && <Badge variant="destructive" className="ml-2 py-0 h-5" >Out of Stock</Badge>}
+                                                            {isOutOfStock && <Badge variant="destructive" className="ml-2 py-0 h-5">Out of Stock</Badge>}
                                                             {isLowStock && !isOutOfStock && <Badge variant="outline" className="ml-2 text-orange-500 border-orange-500 py-0 h-5"><AlertTriangle className="h-3 w-3 mr-1" /> Low</Badge>}
                                                         </div>
                                                     </div>

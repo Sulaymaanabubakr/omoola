@@ -6,10 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useCart } from "@/components/providers/cart-provider";
-import { useAuth } from "@/components/providers/auth-provider";
+import { fetchPublicSettings } from "@/lib/firestore";
 import { formatCurrency } from "@/lib/query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BUSINESS } from "@/lib/constants";
 
 const checkoutSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
@@ -23,46 +24,38 @@ const checkoutSchema = z.object({
 });
 
 type CheckoutValues = z.infer<typeof checkoutSchema>;
-type CheckoutItemPayload = {
-  productId: string;
-  productSlug?: string;
-  name: string;
-  price: number;
-  qty: number;
-  imageUrl: string;
-  stockQty: number;
-};
+
+function normalizeWhatsAppNumber(value: string) {
+  return value.replace(/[^\d]/g, "");
+}
+
+function formatNaira(value: number) {
+  return `NGN ${value.toLocaleString()}`;
+}
+
+function createOrderNumber() {
+  const ts = Date.now();
+  const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `MLX-${ts}-${rand}`;
+}
 
 export function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, subtotal, removeItem, setQty, clearCart } = useCart();
+  const { items, subtotal, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [serverTotal, setServerTotal] = useState<number | null>(null);
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm<CheckoutValues>({
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [whatsappNumber, setWhatsappNumber] = useState(BUSINESS.whatsapp);
+  const { register, handleSubmit, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
   });
-  const { profile, getToken } = useAuth();
 
-  const readJsonSafe = async (res: Response): Promise<Record<string, unknown>> => {
-    const text = await res.text();
-    if (!text) return {};
-    try {
-      return JSON.parse(text) as Record<string, unknown>;
-    } catch {
-      return {};
-    }
-  };
-
-  // Pre-fill form from logged-in profile
+  // Load store settings for delivery fee and WhatsApp number
   useEffect(() => {
-    if (profile) {
-      const nameParts = (profile.name || "").split(" ");
-      setValue("firstName", nameParts[0] || "", { shouldValidate: false });
-      setValue("lastName", nameParts.slice(1).join(" ") || "", { shouldValidate: false });
-      setValue("email", profile.email || "", { shouldValidate: false });
-      if (profile.phone) setValue("phone", profile.phone, { shouldValidate: false });
-    }
-  }, [profile, setValue]);
+    fetchPublicSettings().then((settings) => {
+      if (settings.deliveryFee) setDeliveryFee(settings.deliveryFee);
+      if (settings.whatsapp) setWhatsappNumber(normalizeWhatsAppNumber(settings.whatsapp));
+    });
+  }, []);
 
   useEffect(() => {
     if (items.length === 0 && !isProcessing) {
@@ -72,132 +65,48 @@ export function CheckoutPage() {
 
   if (items.length === 0 && !isProcessing) return null;
 
-  const onSubmit = async (data: CheckoutValues) => {
+  const total = subtotal + deliveryFee;
+
+  const onSubmit = (data: CheckoutValues) => {
     setIsProcessing(true);
     try {
       if (items.length === 0) {
         throw new Error("Your cart is empty.");
       }
 
-      const token = await getToken();
-      let checkoutItems: CheckoutItemPayload[] = items.map((item) => ({
-        productId: item.productId,
-        productSlug: item.productSlug,
-        name: item.name,
-        price: Number(item.price || 0),
-        qty: Math.max(1, Math.floor(Number(item.qty || 1))),
-        imageUrl: item.imageUrl || "/placeholder.svg",
-        stockQty: Math.max(0, Math.floor(Number(item.stockQty || 0))),
-      }));
+      const orderNumber = createOrderNumber();
+      const customerName = `${data.firstName} ${data.lastName}`;
 
-      const buildOrderPayload = (nextItems: CheckoutItemPayload[]) => {
-        const computedSubtotal = nextItems.reduce((sum, item) => sum + item.price * item.qty, 0);
-        return {
-          customer: { name: `${data.firstName} ${data.lastName}`, email: data.email, phone: data.phone },
-          shippingAddress: {
-            fullName: `${data.firstName} ${data.lastName}`,
-            phone: data.phone,
-            addressLine1: data.address,
-            city: data.city,
-            state: data.state,
-            notes: data.orderNotes,
-          },
-          items: nextItems,
-          subtotal: computedSubtotal,
-          deliveryFee: 0,
-          total: computedSubtotal,
-        };
-      };
+      const orderLines = items.map(
+        (item, index) => `${index + 1}. ${item.name}\n   Qty: ${item.qty}\n   Price: ${formatNaira(item.price)}`,
+      );
 
-      const reconcileFromServer = (details: {
-        missingProductIds?: string[];
-        inactiveProductIds?: string[];
-        insufficientStockItems?: Array<{ productId: string; availableQty: number }>;
-      }) => {
-        const removeSet = new Set<string>([
-          ...(details.missingProductIds || []),
-          ...(details.inactiveProductIds || []),
-          ...((details.insufficientStockItems || []).filter((i) => i.availableQty <= 0).map((i) => i.productId)),
-        ]);
-        const qtyMap = new Map<string, number>(
-          (details.insufficientStockItems || [])
-            .filter((i) => i.availableQty > 0)
-            .map((i) => [i.productId, i.availableQty]),
-        );
+      const text = [
+        "*NEW ORDER REQUEST*",
+        "",
+        `Order No: ${orderNumber}`,
+        `Customer: ${customerName}`,
+        `Phone: ${data.phone}`,
+        `Email: ${data.email}`,
+        "",
+        "*ITEMS*",
+        ...orderLines,
+        "",
+        "*ORDER SUMMARY*",
+        `Subtotal: ${formatNaira(subtotal)}`,
+        `Delivery Fee: ${formatNaira(deliveryFee)}`,
+        `Total: ${formatNaira(total)}`,
+        "",
+        "*DELIVERY ADDRESS*",
+        data.address,
+        `${data.city}, ${data.state}`,
+        data.orderNotes ? `Notes: ${data.orderNotes}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
 
-        for (const id of removeSet) removeItem(id);
-        for (const [id, qty] of qtyMap.entries()) setQty(id, qty);
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
 
-        return checkoutItems
-          .filter((item) => !removeSet.has(item.productId))
-          .map((item) => (qtyMap.has(item.productId) ? { ...item, qty: Math.min(item.qty, qtyMap.get(item.productId) || item.qty) } : item))
-          .filter((item) => item.qty > 0);
-      };
-
-      let orderData: Record<string, unknown> | null = null;
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        const orderRes = await fetch("/api/orders", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify(buildOrderPayload(checkoutItems)),
-        });
-        const parsedOrderData = await readJsonSafe(orderRes);
-
-        if (orderRes.ok && parsedOrderData.success) {
-          orderData = parsedOrderData;
-          break;
-        }
-
-        if (attempt === 0 && orderRes.status === 409 && parsedOrderData.code === "CART_OUTDATED") {
-          const details = (parsedOrderData.details || {}) as {
-            missingProductIds?: string[];
-            inactiveProductIds?: string[];
-            insufficientStockItems?: Array<{ productId: string; availableQty: number }>;
-          };
-          checkoutItems = reconcileFromServer(details);
-          if (!checkoutItems.length) {
-            throw new Error("All items in your cart are currently unavailable. Please update your cart and try again.");
-          }
-          toast.info("Cart updated with latest availability. Retrying checkout...");
-          continue;
-        }
-
-        throw new Error(String(parsedOrderData.error || "Failed to create order"));
-      }
-
-      if (!orderData) throw new Error("Could not create order after cart reconciliation.");
-      const orderId = String(orderData.orderId || "");
-      const amount = Number(orderData.amount || 0);
-      if (!orderId || amount <= 0) throw new Error("Invalid order response from server");
-
-      const adjustments = (orderData.adjustments || {}) as {
-        missingProductIds?: string[];
-        inactiveProductIds?: string[];
-        insufficientStockItems?: Array<{ productId: string; availableQty: number }>;
-      };
-      const hadAdjustments =
-        (adjustments.missingProductIds?.length || 0) > 0 ||
-        (adjustments.inactiveProductIds?.length || 0) > 0 ||
-        (adjustments.insufficientStockItems?.length || 0) > 0;
-      if (hadAdjustments) {
-        for (const id of adjustments.missingProductIds || []) removeItem(id);
-        for (const id of adjustments.inactiveProductIds || []) removeItem(id);
-        for (const entry of adjustments.insufficientStockItems || []) {
-          if (entry.availableQty > 0) setQty(entry.productId, entry.availableQty);
-          else removeItem(entry.productId);
-        }
-        toast.info("Some cart items were adjusted to current availability.");
-      }
-
-      // Use the server-calculated total (includes delivery fee from store settings)
-      setServerTotal(amount);
-      const whatsappUrl = String(orderData.whatsappUrl || "");
-      if (!whatsappUrl) {
-        throw new Error("WhatsApp ordering is not configured for this store.");
-      }
       clearCart();
       window.location.href = whatsappUrl;
     } catch (err) {
@@ -292,8 +201,13 @@ export function CheckoutPage() {
                 <div className="flex items-center justify-between border-t border-zinc-200 py-4 text-[12px] font-bold uppercase tracking-widest text-zinc-900">
                   <span>Subtotal</span><span className="text-[15px]">{formatCurrency(subtotal)}</span>
                 </div>
+                {deliveryFee > 0 && (
+                  <div className="flex items-center justify-between py-2 text-[12px] font-bold uppercase tracking-widest text-zinc-900">
+                    <span>Delivery Fee</span><span className="text-[15px]">{formatCurrency(deliveryFee)}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between py-4 text-xl font-bold uppercase tracking-widest text-zinc-900">
-                  <span>Total</span><span className="text-[#7C3AED]">{formatCurrency(serverTotal ?? subtotal)}</span>
+                  <span>Total</span><span className="text-[#7C3AED]">{formatCurrency(total)}</span>
                 </div>
               </div>
               <Button type="submit" disabled={isProcessing} className="mt-6 h-14 w-full rounded-none bg-[#222222] text-[13px] font-bold uppercase tracking-[0.1em] text-white hover:bg-[#7C3AED]">

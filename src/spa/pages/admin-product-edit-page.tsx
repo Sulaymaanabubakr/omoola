@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Loader2, ImagePlus, X, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, ImagePlus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { getDbClient } from "@/lib/firebase/client";
-import { doc, getDoc, setDoc, updateDoc, collection } from "firebase/firestore";
-import { useAuth } from "@/components/providers/auth-provider";
+import { supabase } from "@/lib/supabase";
+import { mapDbProduct } from "@/lib/firestore";
+import { uploadImageToCloudinary, saveAdminProduct } from "@/lib/firestore-admin";
 import type { Product, ProductImage } from "@/types";
 
 type ProductFormState = Omit<Partial<Product>, "price" | "compareAtPrice" | "stockQty"> & {
@@ -27,7 +27,6 @@ function parseNumberInput(value: string): number | "" {
 export function AdminProductEditPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { getToken } = useAuth();
 
     const isNew = !id;
     const [loading, setLoading] = useState(!isNew);
@@ -55,21 +54,25 @@ export function AdminProductEditPage() {
         if (!isNew && id) {
             const loadProduct = async () => {
                 try {
-                    const db = await getDbClient();
-                    if (!db) return;
-                    const docSnap = await getDoc(doc(db, "products", id));
-                    if (docSnap.exists()) {
-                        const product = docSnap.data() as Product;
-                        setFormData({
-                            ...product,
-                            price: product.price ?? "",
-                            compareAtPrice: product.compareAtPrice ?? "",
-                            stockQty: product.stockQty ?? "",
-                        });
-                    } else {
+                    const { data, error } = await supabase
+                        .from("products")
+                        .select("*")
+                        .eq("id", id)
+                        .single();
+
+                    if (error || !data) {
                         toast.error("Product not found");
                         navigate("/admin/products");
+                        return;
                     }
+
+                    const product = mapDbProduct(data);
+                    setFormData({
+                        ...product,
+                        price: product.price ?? "",
+                        compareAtPrice: product.compareAtPrice ?? "",
+                        stockQty: product.stockQty ?? "",
+                    });
                 } catch (err) {
                     toast.error("Failed to load product");
                     console.error(err);
@@ -94,35 +97,19 @@ export function AdminProductEditPage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async () => {
-            const base64 = reader.result as string;
-            try {
-                const token = await getToken();
-                toast.loading("Uploading image...", { id: "upload" });
-                const res = await fetch("/api/admin/upload", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ image: base64 })
-                });
+        try {
+            toast.loading("Uploading image...", { id: "upload" });
+            const { url, publicId } = await uploadImageToCloudinary(file);
 
-                if (!res.ok) throw new Error("Upload failed");
-                const { url, publicId } = await res.json();
-
-                setFormData(prev => ({
-                    ...prev,
-                    images: [...(prev.images || []), { url, publicId, alt: prev.name || "Product Image" }]
-                }));
-                toast.success("Image uploaded", { id: "upload" });
-            } catch (err) {
-                toast.error("Image upload failed", { id: "upload" });
-                console.error(err);
-            }
-        };
+            setFormData(prev => ({
+                ...prev,
+                images: [...(prev.images || []), { url, publicId, alt: prev.name || "Product Image" }]
+            }));
+            toast.success("Image uploaded", { id: "upload" });
+        } catch (err) {
+            toast.error("Image upload failed", { id: "upload" });
+            console.error(err);
+        }
     };
 
     const handleRemoveImage = (index: number) => {
@@ -137,32 +124,20 @@ export function AdminProductEditPage() {
         setSaving(true);
 
         try {
-            const db = await getDbClient();
-            if (!db) throw new Error("Firebase not initialized");
-
             if (formData.price === "" || formData.stockQty === "") {
                 throw new Error("Price and stock quantity are required");
             }
 
-            const productData = {
+            const productData: Partial<Product> = {
                 ...formData,
-                price: formData.price,
-                stockQty: formData.stockQty,
-                compareAtPrice: formData.compareAtPrice === "" ? undefined : formData.compareAtPrice,
-                updatedAt: new Date().toISOString()
+                id: isNew ? undefined : id,
+                price: Number(formData.price),
+                stockQty: Number(formData.stockQty),
+                compareAtPrice: formData.compareAtPrice === "" ? undefined : Number(formData.compareAtPrice),
             };
 
-            const sanitizedProductData = Object.fromEntries(
-                Object.entries(productData).filter(([, value]) => value !== undefined)
-            );
-
-            if (isNew) {
-                sanitizedProductData.createdAt = new Date().toISOString();
-                const newDocRef = doc(collection(db, "products"));
-                await setDoc(newDocRef, { ...sanitizedProductData, id: newDocRef.id });
-            } else if (id) {
-                await updateDoc(doc(db, "products", id), sanitizedProductData);
-            }
+            const savedId = await saveAdminProduct(productData, isNew);
+            if (!savedId) throw new Error("Failed to save product");
 
             toast.success(`Product ${isNew ? 'created' : 'updated'} successfully`);
             navigate("/admin/products");
@@ -196,7 +171,6 @@ export function AdminProductEditPage() {
 
             <div className="grid gap-6 md:grid-cols-[1fr_300px]">
                 <div className="space-y-6">
-                    {/* General Information */}
                     <Card>
                         <CardHeader>
                             <CardTitle>General Information</CardTitle>
@@ -217,7 +191,6 @@ export function AdminProductEditPage() {
                         </CardContent>
                     </Card>
 
-                    {/* Pricing and Inventory */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Pricing & Inventory</CardTitle>
@@ -242,7 +215,6 @@ export function AdminProductEditPage() {
                         </CardContent>
                     </Card>
 
-                    {/* Media */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Media</CardTitle>
@@ -272,7 +244,6 @@ export function AdminProductEditPage() {
                 </div>
 
                 <div className="space-y-6">
-                    {/* Organization & Status */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Organization</CardTitle>

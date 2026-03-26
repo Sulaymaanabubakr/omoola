@@ -10,7 +10,7 @@ interface AdminTopbarProps {
 }
 
 export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
-    const { profile, logout } = useAuth();
+    const { user, logout } = useAuth();
     const settings = usePublicStoreSettings();
     const storeName = settings.storeName || BUSINESS.name;
 
@@ -28,7 +28,7 @@ export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
             <div className="flex items-center gap-4">
                 <div className="hidden text-sm md:block">
                     <span className="text-muted-foreground mr-1">Logged in as:</span>
-                    <span className="font-medium">{profile?.name || profile?.email}</span>
+                    <span className="font-medium">{user?.email}</span>
                 </div>
                 <Button variant="outline" size="sm" onClick={logout} className="gap-2">
                     <LogOut className="h-4 w-4" />

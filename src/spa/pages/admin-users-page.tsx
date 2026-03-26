@@ -4,40 +4,37 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useAuth } from "@/components/providers/auth-provider";
-import type { UserProfile } from "@/types";
+import { fetchAdminUsers } from "@/lib/firestore-admin";
 
-interface CustomerWithStats extends UserProfile {
+interface CustomerWithStats {
+    uid: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    role?: string;
+    createdAt?: string;
     totalOrders: number;
     totalSpent: number;
     lastOrderDate?: string;
 }
 
 export function AdminUsersPage() {
-    const { getToken } = useAuth();
     const [customers, setCustomers] = useState<CustomerWithStats[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        async function fetchCustomersAndStats() {
+        async function loadUsers() {
             try {
-                const token = await getToken();
-                if (!token) throw new Error("Unauthorized");
-                const res = await fetch("/api/admin/users", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Failed to load customers");
-                setCustomers((data.items || []) as CustomerWithStats[]);
+                const items = await fetchAdminUsers();
+                setCustomers(items as CustomerWithStats[]);
             } catch (err: any) {
                 toast.error("Failed to load customers: " + err.message);
             } finally {
                 setLoading(false);
             }
         }
-
-        fetchCustomersAndStats();
+        loadUsers();
     }, []);
 
     const filteredCustomers = customers.filter(c =>
