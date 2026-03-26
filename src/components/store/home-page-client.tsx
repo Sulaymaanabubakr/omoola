@@ -81,7 +81,7 @@ export function HomePageClient({
             <img
               src={activeHeroImages[heroIndex]}
               alt="Omoola Pharmacy & Stores Hero"
-              className="h-full w-full object-cover opacity-50 mix-blend-overlay"
+              className="h-full w-full object-cover opacity-40"
               loading="eager"
             />
           </motion.div>
