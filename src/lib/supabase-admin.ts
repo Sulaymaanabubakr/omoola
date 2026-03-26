@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { defaultStoreSettings, serializeStoreSettings } from "@/lib/settings-serialization";
-import { mapDbProduct, mapProductToDb } from "@/lib/firestore";
+import { mapDbProduct, mapProductToDb } from "@/lib/supabase-data";
 import type { Category, Order, Product, StatusEvent, StoreSettings } from "@/types";
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────

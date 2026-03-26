@@ -78,6 +78,21 @@ export async function fetchProducts(filters: ProductFilters = {}): Promise<Produ
     };
 }
 
+// ─── Categories ──────────────────────────────────────────────────────────────
+
+export async function fetchCategories(): Promise<{ id: string; name: string; slug: string }[]> {
+    const { data, error } = await supabase.from("categories").select("*").order("name");
+    if (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+    }
+    return (data || []).map(row => ({
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+    }));
+}
+
 // ─── Settings ────────────────────────────────────────────────────────────────
 
 export async function fetchPublicSettings(): Promise<StoreSettings> {

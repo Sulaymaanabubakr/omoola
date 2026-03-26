@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchPublicSettings } from "@/lib/firestore";
+import { fetchPublicSettings } from "@/lib/supabase-data";
 import { defaultStoreSettings } from "@/lib/settings-serialization";
 
 export function usePublicStoreSettings() {

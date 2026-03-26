@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { fetchAdminProducts, toggleProductStatus, deleteAdminProduct } from "@/lib/firestore-admin";
+import { fetchAdminProducts, toggleProductStatus, deleteAdminProduct } from "@/lib/supabase-admin";
 import type { Product } from "@/types";
 
 export function AdminProductsPage() {

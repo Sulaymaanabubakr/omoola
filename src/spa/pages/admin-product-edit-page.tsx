@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { mapDbProduct } from "@/lib/firestore";
-import { uploadImageToCloudinary, saveAdminProduct } from "@/lib/firestore-admin";
+import { mapDbProduct } from "@/lib/supabase-data";
+import { uploadImageToCloudinary, saveAdminProduct } from "@/lib/supabase-admin";
 import type { Product, ProductImage } from "@/types";
 
 type ProductFormState = Omit<Partial<Product>, "price" | "compareAtPrice" | "stockQty"> & {

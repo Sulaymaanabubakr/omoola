@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { fetchAdminCategories, saveAdminCategory, deleteAdminCategory } from "@/lib/firestore-admin";
+import { fetchAdminCategories, saveAdminCategory, deleteAdminCategory } from "@/lib/supabase-admin";
 import type { Category } from "@/types";
 
 export function AdminCategoriesPage() {

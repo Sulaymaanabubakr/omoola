@@ -8,15 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SectionTitle } from "@/components/store/section-title";
 import { ProductCard } from "@/components/store/product-card";
-import { fetchPublicSettings, subscribeNewsletter } from "@/lib/firestore";
+import { fetchCategories, fetchPublicSettings, subscribeNewsletter } from "@/lib/supabase-data";
 import { defaultHeroImages } from "@/lib/settings-serialization";
 import type { Product, StoreSettings } from "@/types";
 
-const categories = [
-  { name: "FASHION", slug: "fashion-accessories" },
-  { name: "BEAUTY", slug: "beauty-personal-care" },
-  { name: "FOODSTUFF", slug: "foodstuff-groceries" },
-];
 
 export function HomePageClient({
   bestSellers,
@@ -27,6 +22,7 @@ export function HomePageClient({
 }) {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [heroIndex, setHeroIndex] = useState(0);
+  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
   const [storeSettings, setStoreSettings] = useState<Pick<StoreSettings, "heroImages">>({
     heroImages: defaultHeroImages,
   });
@@ -41,6 +37,10 @@ export function HomePageClient({
       .catch(() => {
         setStoreSettings({ heroImages: defaultHeroImages });
       });
+
+    fetchCategories()
+      .then((data) => setCategories(data))
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -109,10 +109,10 @@ export function HomePageClient({
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4 md:justify-start">
               <Button asChild className="h-12 rounded-none bg-[#7C3AED] px-10 text-[13px] font-bold uppercase tracking-widest text-white shadow-lg hover:bg-[#EA580C]">
-                <Link to="/shop?category=foodstuff-groceries">Shop Provisions</Link>
+                <Link to="/shop">Shop Now</Link>
               </Button>
               <Button asChild variant="outline" className="h-12 rounded-none border-2 border-white bg-transparent px-10 text-[13px] font-bold uppercase tracking-widest text-white shadow-lg transition-colors hover:bg-white hover:text-zinc-900">
-                <Link to="/shop?category=foodstuff-groceries">Shop Foodstuff</Link>
+                <Link to="/shop">Browse Collections</Link>
               </Button>
             </div>
           </motion.div>
@@ -127,7 +127,7 @@ export function HomePageClient({
           {categories.map((cat, idx) => (
             <div key={cat.name} className="flex items-center">
               <Link
-                to={`/category/${cat.slug}`}
+                to={`/category/${cat.id}`}
                 className="shrink-0 px-2 py-1 text-[11px] font-bold uppercase tracking-widest text-zinc-500 transition-colors hover:text-[#7C3AED]"
               >
                 {cat.name}

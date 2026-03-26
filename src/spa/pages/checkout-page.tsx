@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useCart } from "@/components/providers/cart-provider";
-import { fetchPublicSettings } from "@/lib/firestore";
+import { fetchPublicSettings } from "@/lib/supabase-data";
 import { formatCurrency } from "@/lib/query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

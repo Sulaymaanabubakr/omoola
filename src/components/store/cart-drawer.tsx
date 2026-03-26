@@ -6,7 +6,7 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/components/providers/cart-provider";
-import { fetchPublicSettings } from "@/lib/firestore";
+import { fetchPublicSettings } from "@/lib/supabase-data";
 import { formatCurrency } from "@/lib/query";
 
 export function CartDrawer({ children }: { children: React.ReactNode }) {

@@ -9,7 +9,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { fetchAdminDashboardStats } from "@/lib/firestore-admin";
+import { fetchAdminDashboardStats } from "@/lib/supabase-admin";
 import type { Product } from "@/types";
 
 export function AdminPage() {

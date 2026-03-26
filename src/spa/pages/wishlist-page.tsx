@@ -4,7 +4,7 @@ import { ChevronRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/store/product-card";
 import { useWishlist } from "@/components/providers/wishlist-provider";
-import { fetchProducts } from "@/lib/firestore";
+import { fetchProducts } from "@/lib/supabase-data";
 import type { Product } from "@/types";
 
 export function WishlistPage() {

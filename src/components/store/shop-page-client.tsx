@@ -8,15 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchProducts } from "@/lib/firestore";
+import { fetchCategories, fetchProducts } from "@/lib/supabase-data";
 import type { Product } from "@/types";
 
-const categories = [
-  { id: "all", name: "All" },
-  { id: "fashion-accessories", name: "Fashion & Accessories" },
-  { id: "beauty-personal-care", name: "Beauty & Personal Care" },
-  { id: "foodstuff-groceries", name: "Foodstuff & Groceries" },
-];
 
 export function ShopPageClient({
   initialItems,
@@ -37,6 +31,7 @@ export function ShopPageClient({
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([{ id: "all", name: "All" }]);
   const [sort, setSort] = useState(initialSort);
   const [page, setPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
@@ -54,6 +49,10 @@ export function ShopPageClient({
         setTotalPages(data.pagination.totalPages);
       })
       .finally(() => setLoading(false));
+      
+    fetchCategories()
+      .then((data) => setCategories([{ id: "all", name: "All" }, ...data]))
+      .catch(console.error);
   }, [filters]);
 
   return (

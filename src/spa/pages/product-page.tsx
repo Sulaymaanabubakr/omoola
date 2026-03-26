@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ProductDetailClient } from "@/components/store/product-detail-client";
-import { fetchProducts } from "@/lib/firestore";
+import { fetchProducts } from "@/lib/supabase-data";
 import type { Product } from "@/types";
 
 export function ProductPage() {

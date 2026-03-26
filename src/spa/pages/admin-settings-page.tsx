@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { fetchAdminSettings, saveAdminSettings, uploadImageToCloudinary } from "@/lib/firestore-admin";
+import { fetchAdminSettings, saveAdminSettings, uploadImageToCloudinary } from "@/lib/supabase-admin";
 import type { StoreSettings } from "@/types";
 
 type SettingsFormState = Omit<StoreSettings, "deliveryFee" | "announcementSpeed"> & {

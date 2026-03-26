@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { HomePageClient } from "@/components/store/home-page-client";
-import { fetchProducts } from "@/lib/firestore";
+import { fetchProducts } from "@/lib/supabase-data";
 import type { Product } from "@/types";
 
 function sortByCreatedAtDesc(a: Product, b: Product) {

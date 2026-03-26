@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { fetchAdminProducts, updateProductStock } from "@/lib/firestore-admin";
+import { fetchAdminProducts, updateProductStock } from "@/lib/supabase-admin";
 import type { Product } from "@/types";
 
 export function AdminInventoryPage() {

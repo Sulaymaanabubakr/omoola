@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { BUSINESS } from "@/lib/constants";
-import { submitContactForm } from "@/lib/firestore";
+import { submitContactForm } from "@/lib/supabase-data";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
