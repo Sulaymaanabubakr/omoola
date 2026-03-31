@@ -60,6 +60,8 @@ export async function fetchProducts(filters: ProductFilters = {}): Promise<Produ
     let sorted = products;
     if (sort === "best") {
         sorted = [...products].sort((a, b) => Number(Boolean(b.bestSeller)) - Number(Boolean(a.bestSeller)));
+    } else if (sort === "featured") {
+        sorted = [...products].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
     }
 
     const safePage = Number.isFinite(page) && page > 0 ? page : 1;

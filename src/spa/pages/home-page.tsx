@@ -31,15 +31,15 @@ export function HomePage() {
     [items],
   );
 
-  const newArrivals = useMemo(
+  const featuredItems = useMemo(
     () =>
       uniqueProducts(
-        items.filter((p) => p.newArrival && !bestSellers.some((featured) => featured.id === p.id)),
+        items.filter((p) => p.featured && !bestSellers.some((bs) => bs.id === p.id)),
       )
         .sort(sortByCreatedAtDesc)
         .slice(0, 4),
     [items, bestSellers],
   );
 
-  return <HomePageClient bestSellers={bestSellers} newArrivals={newArrivals} />;
+  return <HomePageClient bestSellers={bestSellers} featuredItems={featuredItems} />;
 }

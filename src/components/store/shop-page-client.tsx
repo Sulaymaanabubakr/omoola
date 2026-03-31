@@ -124,6 +124,7 @@ export function ShopPageClient({
                   <SelectContent className="rounded-none">
                     <SelectItem value="new">Newness</SelectItem>
                     <SelectItem value="best">Popularity</SelectItem>
+                    <SelectItem value="featured">Featured</SelectItem>
                     <SelectItem value="price-asc">Price: Low to High</SelectItem>
                     <SelectItem value="price-desc">Price: High to Low</SelectItem>
                   </SelectContent>

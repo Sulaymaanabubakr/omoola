@@ -15,10 +15,10 @@ import type { Product, StoreSettings } from "@/types";
 
 export function HomePageClient({
   bestSellers,
-  newArrivals,
+  featuredItems,
 }: {
   bestSellers: Product[];
-  newArrivals: Product[];
+  featuredItems: Product[];
 }) {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [heroIndex, setHeroIndex] = useState(0);
@@ -186,10 +186,10 @@ export function HomePageClient({
       </section>
 
       <section className="container mx-auto px-4 py-16 sm:py-24">
-        <SectionTitle title="FEATURED ITEMS" align="center" viewAllHref="/shop?sort=new" />
+        <SectionTitle title="FEATURED ITEMS" align="center" viewAllHref="/shop?sort=featured" />
         <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 lg:gap-8">
-          {newArrivals.length > 0 ? (
-            newArrivals.map((p) => <ProductCard key={p.id} product={p} />)
+          {featuredItems.length > 0 ? (
+            featuredItems.map((p) => <ProductCard key={p.id} product={p} />)
           ) : (
             Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="aspect-[3/4] animate-pulse bg-zinc-100" />
